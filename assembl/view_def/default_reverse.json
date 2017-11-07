@@ -45,6 +45,10 @@
         "password": "password_p",
         "permissions": false,
         "username": "username_p",
+        "country": true,
+        "city": true,
+        "org_unit": true,
+        "org_title": true,
         "real_name": "real_name_p"
     },
     "AbstractAgentAccount": {

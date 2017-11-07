@@ -704,8 +704,13 @@ class User(AgentProfile):
     last_login = Column(DateTime)
     last_assembl_login = Column(DateTime)
     login_failures = Column(Integer, default=0)
-    creation_date = Column(
-        DateTime, nullable=False, default=datetime.utcnow, info={'rdf': QuadMapPatternS(None, DCTERMS.created, sections=(PRIVATE_USER_SECTION,))})
+    creation_date = Column(DateTime, nullable=False, default=datetime.utcnow,
+        info={'rdf': QuadMapPatternS(
+            None, DCTERMS.created, sections=(PRIVATE_USER_SECTION,))})
+    country = Column(String(2))
+    city = Column(CoerceUnicode)
+    org_unit = Column(CoerceUnicode)
+    org_title = Column(CoerceUnicode)
     social_accounts = relationship('SocialAuthAccount')
 
     def __init__(self, **kwargs):

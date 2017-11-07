@@ -39,6 +39,10 @@
         "password": false,
         "verified": true,
         "permissions": "permissions_for_current_discussion",
+        "country": true,
+        "city": true,
+        "org_unit": true,
+        "org_title": true,
         "notification_subscriptions": "&get_notification_subscriptions_for_current_discussion:"
     },
     "UserTemplate": {

@@ -24,6 +24,10 @@
         "last_login": true,
         "login_failures": false,
         "password": false,
+        "country": true,
+        "city": true,
+        "org_unit": true,
+        "org_title": true,
         "verified": true
     },
     "UserTemplate": {

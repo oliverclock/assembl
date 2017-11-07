@@ -54,6 +54,10 @@
         "first_visit": true,
         "was_created_on_current_discussion": true,
         "permissions": "permissions_for_current_discussion",
+        "country": true,
+        "city": true,
+        "org_unit": true,
+        "org_title": true,
         "username": "username_p"
     },
     "UserTemplate": {
