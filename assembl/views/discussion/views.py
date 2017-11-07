@@ -14,6 +14,7 @@ from pyramid.i18n import TranslationStringFactory
 from sqlalchemy.orm.exc import NoResultFound
 
 from ...lib.utils import path_qs
+from ...lib.locale import country_names
 from ...lib.sqla import get_named_object
 from ...lib.frontend_urls import FrontendUrls
 from ...auth import P_READ, P_ADD_EXTRACT, P_ADMIN_DISC
@@ -306,6 +307,7 @@ def react_view(request, required_permission=P_READ):
         messages=old_context.get('messages', None),
         providers_json=old_context.get('providers_json', None),
         get_route=get_route,
+        country_names=json.dumps(country_names(request.locale_name)),
         **common_context
     )
     return context

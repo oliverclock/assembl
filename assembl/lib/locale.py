@@ -130,6 +130,12 @@ def get_preferred_languages(session, user_id):
     return [Locale.code_for_id(p.locale_id) for p in prefs]
 
 
+def country_names(current_locale):
+    from babel import Locale
+    locale = Locale(*current_locale.split('_'))
+    return dict(locale.territories)
+
+
 def locale_negotiator(request):
     settings = get_config()
     available = settings.get('available_languages').split()
