@@ -16,20 +16,23 @@ from assembl.models.action import SentimentOfPost
 from assembl.models.post import countable_publication_states
 from assembl.nlp.translation_service import DummyGoogleTranslationService
 
-from .document import UploadDocument
-from .discussion import (DiscussionPreferences, LocalePreference,
-                         ResourcesCenter, UpdateDiscussionPreferences,
-                         UpdateResourcesCenter)
-from .idea import (CreateIdea, CreateThematic, DeleteThematic, Idea, IdeaUnion,
-                   Thematic, UpdateThematic)
-from .locale import Locale
-from .post import (
+from assembl.graphql.document import UploadDocument
+from assembl.graphql.discussion import (
+    DiscussionPreferences, LocalePreference,
+    ResourcesCenter, UpdateDiscussionPreferences,
+    UpdateResourcesCenter, Discussion)
+from assembl.graphql.idea import (
+    CreateIdea, CreateThematic, DeleteThematic, Idea, IdeaUnion,
+    Thematic, UpdateThematic)
+from assembl.graphql.locale import Locale
+from assembl.graphql.post import (
     CreatePost, DeletePost, UndeletePost, UpdatePost,
     AddPostAttachment, DeletePostAttachment)
-from .resource import CreateResource, DeleteResource, Resource, UpdateResource
-from .sentiment import AddSentiment, DeleteSentiment
-from .synthesis import Synthesis
-from .utils import get_root_thematic_for_phase
+from assembl.graphql.resource import (
+    CreateResource, DeleteResource, Resource, UpdateResource)
+from assembl.graphql.sentiment import AddSentiment, DeleteSentiment
+from assembl.graphql.synthesis import Synthesis
+from assembl.graphql.utils import get_root_thematic_for_phase
 
 
 convert_sqlalchemy_type.register(EmailString)(convert_column_to_string)
@@ -63,6 +66,7 @@ class Query(graphene.ObjectType):
     resources = graphene.List(Resource)
     resources_center = graphene.Field(lambda: ResourcesCenter)
     has_resources_center = graphene.Boolean()
+    discussion = graphene.Field(Discussion)
 
     def resolve_resources(self, args, context, info):
         model = models.Resource
@@ -188,6 +192,11 @@ class Query(graphene.ObjectType):
 
     def resolve_resources_center(self, args, context, info):
         return ResourcesCenter()
+
+    def resolve_discussion(self, args, context, info):
+        discussion_id = context.matchdict['discussion_id']
+        discussion = models.Discussion.get(discussion_id)
+        return discussion
 
 
 class Mutations(graphene.ObjectType):

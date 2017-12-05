@@ -1938,3 +1938,16 @@ mutation updateResourcesCenter($headerImage:String) {
     assert resources_center['headerImage'] is not None
     assert '/documents/' in resources_center['headerImage']['externalUrl']
     assert resources_center['headerImage']['title'] == 'new-img.png'
+
+
+def test_query_discussion_homepage(graphql_request, discussion, test_session):
+
+    url = u"https://www.liverpoolfc.com"
+    discussion.homepage_url = url
+    test_session.commit()
+
+    query = u"""
+query { discussion { homepageUrl }  }
+"""
+    res = schema.execute(query, context_value=graphql_request)
+    assert res.data['discussion']['homepageUrl'] == url
