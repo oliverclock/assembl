@@ -1,7 +1,7 @@
 import React from 'react';
 import { I18n } from 'react-redux-i18n';
 import { Grid, Col, Button, Image, ResponsiveEmbed } from 'react-bootstrap';
-import { EDFHacks } from '../home/video';
+import { VideoTypeGuesser } from '../home/video';
 
 import { displayModal } from '../../utils/utilityManager';
 
@@ -35,14 +35,18 @@ class Media extends React.Component {
 
   static Content = ({ content }) => {
     const isLocal = content[0] === '/';
-    const isVideoFile = EDFHacks.srcIsVideoFile(content);
+    const videoType = VideoTypeGuesser.guessVideoType(content);
     const component = isLocal ? (
       <Image responsive src={content} />
     ) : (
       <ResponsiveEmbed a16by9>
-        {isVideoFile ? (
-          <video src={content} controls preload="none" /> // eslint-disable-line jsx-a11y/media-has-caption
+        {videoType ? (
+          /* eslint-disable jsx-a11y/media-has-caption */
+          <video controls preload="none">
+            <source src={content} type={videoType} />
+          </video>
         ) : (
+          /* eslint-enable jsx-a11y/media-has-caption */
           <iframe title="media" src={content} />
         )}
       </ResponsiveEmbed>

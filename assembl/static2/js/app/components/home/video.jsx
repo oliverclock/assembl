@@ -5,6 +5,7 @@ import { Grid, Row, Col } from 'react-bootstrap';
 import get from 'lodash/get';
 
 // https://en.wikipedia.org/wiki/Video_file_format
+/*
 const videoExtensions = [
   'webm',
   'mkv',
@@ -48,12 +49,20 @@ const videoExtensions = [
   'f4a',
   'f4b'
 ];
+*/
 
-export const EDFHacks = {
-  srcIsVideoFile: (src) => {
+const videoTypes = {
+  mp4: 'video/mp4; codecs="avc1.4D401E, mp4a.40.2',
+  m4v: 'video/mp4; codecs="avc1.4D401E, mp4a.40.2',
+  webm: 'video/webm'
+  // TODO: complete
+};
+
+export const VideoTypeGuesser = {
+  guessVideoType: (src) => {
     const components = src.split('.');
     const extension = components[components.length - 1];
-    return videoExtensions.indexOf(extension) > -1;
+    return videoTypes[extension];
   }
 };
 
@@ -81,7 +90,7 @@ class Video extends React.Component {
     const { locale } = this.props.i18n;
     const videoUrl = get(debateData, 'video.videoUrl', '');
     const posterUrl = get(debateData, 'video.posterUrl', '');
-    const isVideoFile = EDFHacks.srcIsVideoFile(videoUrl);
+    const videoType = VideoTypeGuesser.guessVideoType(videoUrl);
     const posterProps = {};
     if (posterUrl) posterProps.poster = posterUrl;
     return (
@@ -107,9 +116,13 @@ class Video extends React.Component {
                   {videoUrl && (
                     <Col xs={12} md={6} className={this.state.isTextHigher ? 'col-bottom' : ''}>
                       <div className="video-container" id="video-vid">
-                        {isVideoFile ? (
-                          <video src={videoUrl} controls preload="none" {...posterProps} /> // eslint-disable-line jsx-a11y/media-has-caption
+                        {videoType ? (
+                          /* eslint-disable jsx-a11y/media-has-caption */
+                          <video controls preload="none" {...posterProps}>
+                            <source src={videoUrl} type={videoType} />
+                          </video>
                         ) : (
+                          /* eslint-enable jsx-a11y/media-has-caption */
                           <iframe src={debateData.video.videoUrl} frameBorder="0" width="560" height="315" title="video" />
                         )}
                       </div>
