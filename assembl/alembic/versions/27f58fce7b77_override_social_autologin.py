@@ -1,14 +1,14 @@
 """override_social_autologin
 
 Revision ID: 27f58fce7b77
-Revises: c5754a7cb6be
+Revises: c98a9b6f6b7f
 Create Date: 2017-12-12 11:47:45.917957
 
 """
 
 # revision identifiers, used by Alembic.
 revision = '27f58fce7b77'
-down_revision = 'c5754a7cb6be'
+down_revision = 'c98a9b6f6b7f'
 
 from itertools import product
 
