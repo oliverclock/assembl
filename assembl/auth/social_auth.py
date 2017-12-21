@@ -181,7 +181,10 @@ def auto_subscribe(backend, social, user, *args, **kwargs):
 
 
 def print_details(backend, details, *args, **kwargs):
-    print details, args, kwargs
+    if config.get('log_saml', False):
+        # logging does not work in production, this will change soon.
+        # log.info("log_saml: %s, %s, %s" % (details, args, kwargs))
+        print details, args, kwargs
 
 
 def maybe_social_logout(request):
@@ -271,7 +274,7 @@ class AssemblStrategy(PyramidStrategy):
     def get_pipeline(self):
         return (
             # Optional step: print details so we see what's going on
-            # 'assembl.auth.social_auth.print_details',
+            'assembl.auth.social_auth.print_details',
 
             # Get the information we can about the user and return it in a simple
             # format to create the user instance later. On some cases the details are
