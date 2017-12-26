@@ -8,6 +8,15 @@ services:
       - ..:/assembl
     links:
       - database
+  bootstrap:
+    build:
+      context: ..
+      dockerfile: docker/dev.Dockerfile
+    volumes:
+      - ..:/assembl
+    links:
+      - database
+    command: /bin/sh -c '/etc/init.d/ssh start && /usr/bin/ssh-keyscan localhost && /usr/bin/fab -c ./configs/develop.rc bootstrap_from_checkout'
   cli:
     build:
       context: ..
@@ -18,8 +27,6 @@ services:
     links:
       - database
       - supervisor
-    user: assembl_user
-    command: /usr/bin/fish
     hostname: dev-cli
   database:
     image: postgres:9.5.5-alpine
