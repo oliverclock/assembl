@@ -1,0 +1,34 @@
+version: "2"
+services:
+  bootstrap:
+    image: assembl_supervisor
+    volumes:
+      - ..:/assembl
+      - ../dev_home:/home/assembl_user
+    external_links:
+      - database
+    command: /bin/sh -c '/etc/init.d/ssh start && /usr/bin/ssh-keyscan localhost && /usr/bin/fab -c ./configs/develop.rc bootstrap_from_checkout'
+  cli:
+    image: assembl_supervisor
+    volumes:
+      - ..:/assembl
+    depends_on:
+      - cli-ssh
+    external_links:
+      - database
+      - supervisor
+    hostname: dev-cli
+    user: assembl_user
+  cli-ssh:
+    image: assembl_supervisor
+    volumes:
+      - ..:/assembl
+    external_links:
+      - database
+    hostname: cli-ssh
+    networks:
+      default:
+        aliases:
+         - nexus.localdomain
+      
+    command: /bin/sh -c '/etc/init.d/ssh start && /usr/bin/ssh-keyscan localhost && while :; do sleep 1; done'
