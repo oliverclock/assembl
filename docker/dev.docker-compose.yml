@@ -8,29 +8,135 @@ services:
       - ..:/assembl
     links:
       - database
-  bootstrap:
-    build:
-      context: ..
-      dockerfile: docker/dev.Dockerfile
+    user: assembl_user
+    command: "sh -c '. venv/bin/activate && supervisord -n'"
+    ports:
+      - "6543:6543"
+      - "8080:8080"
+    depends_on:
+      - memcached
+      - redis
+  dev:
+    image: assembl_supervisor
     volumes:
       - ..:/assembl
-    links:
-      - database
-    command: /bin/sh -c '/etc/init.d/ssh start && /usr/bin/ssh-keyscan localhost && /usr/bin/fab -c ./configs/develop.rc bootstrap_from_checkout'
-  cli:
-    build:
-      context: ..
-      dockerfile: docker/dev.Dockerfile
-    volumes:
-      - ..:/assembl
-      - ../dev_home:/home/assembl_user
-    links:
-      - database
+    user: assembl_user
+    command: "sh -c '. venv/bin/activate && supervisorctl start dev:'"
+    depends_on:
       - supervisor
-    hostname: dev-cli
+    restart: always
+  redis:
+    image: redis:3.0-alpine
+    volumes:
+      - ../redisdata:/data
+  memcached:
+    image: memcached:1.4-alpine
+  webpack-stderr:
+    image: assembl_supervisor
+    volumes:
+      - ..:/assembl
+    user: assembl_user
+    command: "sh -c '. venv/bin/activate && supervisorctl tail -f dev:webpack stderr'"
+    depends_on:
+      - dev
+    restart: always
+  webpack-stdout:
+    image: assembl_supervisor
+    volumes:
+      - ..:/assembl
+    user: assembl_user
+    command: "sh -c '. venv/bin/activate && supervisorctl tail -f dev:webpack stdout'"
+    depends_on:
+      - dev
+    restart: always
+  pserve-stderr:
+    image: assembl_supervisor
+    volumes:
+      - ..:/assembl
+    user: assembl_user
+    command: "sh -c '. venv/bin/activate && supervisorctl tail -f dev:pserve stderr'"
+    depends_on:
+      - dev
+    restart: always
+  pserve-stdout:
+    image: assembl_supervisor
+    volumes:
+      - ..:/assembl
+    user: assembl_user
+    command: "sh -c '. venv/bin/activate && supervisorctl tail -f dev:pserve stdout'"
+    depends_on:
+      - dev
+    restart: always
+  gulp-stderr:
+    image: assembl_supervisor
+    volumes:
+      - ..:/assembl
+    user: assembl_user
+    command: "sh -c '. venv/bin/activate && supervisorctl tail -f dev:gulp stderr'"
+    depends_on:
+      - dev
+    restart: always
+  gulp-stdout:
+    image: assembl_supervisor
+    volumes:
+      - ..:/assembl
+    user: assembl_user
+    command: "sh -c '. venv/bin/activate && supervisorctl tail -f dev:gulp stdout'"
+    depends_on:
+      - dev
+    restart: always
+  changes_router-stderr:
+    image: assembl_supervisor
+    volumes:
+      - ..:/assembl
+    user: assembl_user
+    command: "sh -c '. venv/bin/activate && supervisorctl tail -f changes_router stderr'"
+    depends_on:
+      - dev
+    restart: always
+  changes_router-stdout:
+    image: assembl_supervisor
+    volumes:
+      - ..:/assembl
+    user: assembl_user
+    command: "sh -c '. venv/bin/activate && supervisorctl tail -f changes_router stdout'"
+    depends_on:
+      - dev
+    restart: always
+  celery_notification_dispatch-stderr:
+    image: assembl_supervisor
+    volumes:
+      - ..:/assembl
+    user: assembl_user
+    command: "sh -c '. venv/bin/activate && supervisorctl tail -f celery_notification_dispatch stderr'"
+    depends_on:
+      - dev
+    restart: always
+  celery_notification_dispatch-stdout:
+    image: assembl_supervisor
+    volumes:
+      - ..:/assembl
+    user: assembl_user
+    command: "sh -c '. venv/bin/activate && supervisorctl tail -f celery_notification_dispatch stdout'"
+    depends_on:
+      - dev
+    restart: always
   database:
     image: postgres:9.5.5-alpine
     volumes:
       - ../pgdata:/var/lib/postgresql/data
     expose:
       - "5432"
+  elasticsearch:
+    build:
+      context: .
+      dockerfile: elasticsearch.Dockerfile
+      args:
+        version: 5.6.2
+    environment:
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
