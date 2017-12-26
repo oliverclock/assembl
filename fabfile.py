@@ -597,7 +597,7 @@ def reset_semantic_mappings():
     print(cyan('Resetting semantic mappings'))
     venvcmd("echo 'import assembl.semantic ; assembl.semantic.reset_semantic_mapping()'|pshell %s" % env.ini_file)
 
-
+@task
 def app_db_install():
     """
     Install db the first time and fake migrations
