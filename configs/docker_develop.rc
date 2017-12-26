@@ -1,1 +1,3 @@
 _extends = develop.rc
+
+webpack_bound_address = "0.0.0.0"
