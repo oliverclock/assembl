@@ -1760,7 +1760,7 @@ def install_yarn():
                    "deb https://dl.yarnpkg.com/debian/ stable main", True)
             sudo('curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add -')
             sudo('apt-get update')
-            sudo('apt-get install yarn')
+            sudo('apt-get install -y yarn')
     else:
         run('brew install yarn')
 
