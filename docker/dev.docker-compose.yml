@@ -1,6 +1,6 @@
 version: "2"
 services:
-  assembl:
+  supervisor:
     build:
       context: ..
       dockerfile: docker/dev.Dockerfile
