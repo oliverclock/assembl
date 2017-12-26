@@ -39,3 +39,9 @@ RUN echo 'assembl_user ALL = (ALL) NOPASSWD: ALL' >> /etc/sudoers
 
 # mehh
 RUN  useradd -m -U postgres
+
+RUN apt-get update && apt-get install -y \
+    fish \
+    links2 \
+# clear the image cache
+&& rm -rf /var/lib/apt/lists/*
