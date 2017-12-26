@@ -8,6 +8,19 @@ services:
       - ..:/assembl
     links:
       - database
+  cli:
+    build:
+      context: ..
+      dockerfile: docker/dev.Dockerfile
+    volumes:
+      - ..:/assembl
+      - ../dev_home:/home/assembl_user
+    links:
+      - database
+      - supervisor
+    user: assembl_user
+    command: /usr/bin/fish
+    hostname: dev-cli
   database:
     image: postgres:9.5.5-alpine
     volumes:
