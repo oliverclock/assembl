@@ -2,8 +2,8 @@ version: "2"
 services:
   supervisor:
     build:
-      context: .
-      dockerfile: dev.Dockerfile
+      context: ..
+      dockerfile: docker/dev.Dockerfile
     volumes:
       - ..:/assembl
     command: "sh -c '. venv/bin/activate && supervisord -n'"
