@@ -1,0 +1,16 @@
+version: "2"
+services:
+  assembl:
+    build:
+      context: ..
+      dockerfile: docker/dev.Dockerfile
+    volumes:
+      - ..:/assembl
+    links:
+      - database
+  database:
+    image: postgres:9.5.5-alpine
+    volumes:
+      - ../pgdata:/var/lib/postgresql/data
+    expose:
+      - "5432"
