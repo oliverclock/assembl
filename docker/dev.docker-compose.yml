@@ -1,6 +1,6 @@
 version: "2"
 services:
-  supervisor:
+  supervisord:
     build:
       context: ..
       dockerfile: docker/dev.Dockerfile
@@ -21,9 +21,9 @@ services:
       - ..:/assembl
     command: "sh -c '. venv/bin/activate && supervisorctl start dev:'"
     depends_on:
-      - supervisor
+      - supervisord
     restart: always
-  cli-ssh:
+  sshd:
     image: assembl_supervisor
     volumes:
       - ..:/assembl
@@ -63,6 +63,10 @@ services:
     depends_on:
       - dev
     restart: always
+  pgadmin:
+    image: chorss/docker-pgadmin4:2.0
+    ports:
+      - 5050:5050
   webpack-stdout:
     image: assembl_supervisor
     volumes:
@@ -109,7 +113,7 @@ services:
       - ..:/assembl
     command: "sh -c '. venv/bin/activate && supervisorctl tail -f changes_router stderr'"
     depends_on:
-      - supervisor
+      - supervisord
     restart: always
   changes_router-stdout:
     image: assembl_supervisor
@@ -117,7 +121,7 @@ services:
       - ..:/assembl
     command: "sh -c '. venv/bin/activate && supervisorctl tail -f changes_router stdout'"
     depends_on:
-      - supervisor
+      - supervisord
     restart: always
   celery_notification_dispatch-stderr:
     image: assembl_supervisor
@@ -125,7 +129,7 @@ services:
       - ..:/assembl
     command: "sh -c '. venv/bin/activate && supervisorctl tail -f celery_notification_dispatch stderr'"
     depends_on:
-      - supervisor
+      - supervisord
     restart: always
   celery_notification_dispatch-stdout:
     image: assembl_supervisor
@@ -133,5 +137,5 @@ services:
       - ..:/assembl
     command: "sh -c '. venv/bin/activate && supervisorctl tail -f celery_notification_dispatch stdout'"
     depends_on:
-      - supervisor
+      - supervisord
     restart: always
