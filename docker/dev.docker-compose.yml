@@ -16,7 +16,7 @@ services:
       - "6543:6543"
       - "8080:8080"
   dev:
-    image: assembl_supervisor
+    image: devas_supervisord
     volumes:
       - ..:/assembl
     command: "sh -c '. venv/bin/activate && supervisorctl start dev:'"
@@ -24,10 +24,9 @@ services:
       - supervisord
     restart: always
   sshd:
-    image: assembl_supervisor
+    image: devas_supervisord
     volumes:
       - ..:/assembl
-    hostname: cli-ssh
     user: root
     command: /bin/sh -c '/etc/init.d/ssh start && /usr/bin/ssh-keyscan localhost && while :; do sleep 1; done'
   database:
@@ -56,7 +55,7 @@ services:
   memcached:
     image: memcached:1.4-alpine
   webpack-stderr:
-    image: assembl_supervisor
+    image: devas_supervisord
     volumes:
       - ..:/assembl
     command: "sh -c '. venv/bin/activate && supervisorctl tail -f dev:webpack stderr'"
@@ -68,7 +67,7 @@ services:
     ports:
       - 5050:5050
   webpack-stdout:
-    image: assembl_supervisor
+    image: devas_supervisord
     volumes:
       - ..:/assembl
     command: "sh -c '. venv/bin/activate && supervisorctl tail -f dev:webpack stdout'"
@@ -76,7 +75,7 @@ services:
       - dev
     restart: always
   pserve-stderr:
-    image: assembl_supervisor
+    image: devas_supervisord
     volumes:
       - ..:/assembl
     command: "sh -c '. venv/bin/activate && supervisorctl tail -f dev:pserve stderr'"
@@ -84,7 +83,7 @@ services:
       - dev
     restart: always
   pserve-stdout:
-    image: assembl_supervisor
+    image: devas_supervisord
     volumes:
       - ..:/assembl
     command: "sh -c '. venv/bin/activate && supervisorctl tail -f dev:pserve stdout'"
@@ -92,7 +91,7 @@ services:
       - dev
     restart: always
   gulp-stderr:
-    image: assembl_supervisor
+    image: devas_supervisord
     volumes:
       - ..:/assembl
     command: "sh -c '. venv/bin/activate && supervisorctl tail -f dev:gulp stderr'"
@@ -100,7 +99,7 @@ services:
       - dev
     restart: always
   gulp-stdout:
-    image: assembl_supervisor
+    image: devas_supervisord
     volumes:
       - ..:/assembl
     command: "sh -c '. venv/bin/activate && supervisorctl tail -f dev:gulp stdout'"
@@ -108,7 +107,7 @@ services:
       - dev
     restart: always
   changes_router-stderr:
-    image: assembl_supervisor
+    image: devas_supervisord
     volumes:
       - ..:/assembl
     command: "sh -c '. venv/bin/activate && supervisorctl tail -f changes_router stderr'"
@@ -116,7 +115,7 @@ services:
       - supervisord
     restart: always
   changes_router-stdout:
-    image: assembl_supervisor
+    image: devas_supervisord
     volumes:
       - ..:/assembl
     command: "sh -c '. venv/bin/activate && supervisorctl tail -f changes_router stdout'"
@@ -124,7 +123,7 @@ services:
       - supervisord
     restart: always
   celery_notification_dispatch-stderr:
-    image: assembl_supervisor
+    image: devas_supervisord
     volumes:
       - ..:/assembl
     command: "sh -c '. venv/bin/activate && supervisorctl tail -f celery_notification_dispatch stderr'"
