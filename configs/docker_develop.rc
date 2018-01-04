@@ -8,6 +8,13 @@ elasticsearch_host = elasticsearch
 elastic_search_basic_auth = elastic:changeme
 supervisor__autostart_elasticsearch_server = false
 
+supervisor__autostart_pserve = true
+supervisor__autostart_gulp = true
+supervisor__autostart_webpack = true
+supervisor__autostart_celery_notification_dispatch = true
+supervisor__autostart_celery_notify = true
+supervisor__autostart_celery_notify_beat = true
+
 redis_host = redis
 
 memcached_host = memcached
