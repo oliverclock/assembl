@@ -134,3 +134,35 @@ services:
     depends_on:
       - supervisord
     restart: always
+  celery_notify-stderr:
+    image: devas_supervisord
+    volumes:
+      - ..:/assembl
+    command: "sh -c '. venv/bin/activate && supervisorctl tail -f celery_notify stderr'"
+    depends_on:
+      - supervisord
+    restart: always
+  celery_notify-stdout:
+    image: devas_supervisord
+    volumes:
+      - ..:/assembl
+    command: "sh -c '. venv/bin/activate && supervisorctl tail -f celery_notify stdout'"
+    depends_on:
+      - supervisord
+    restart: always
+  celery_notify_beat-stderr:
+    image: devas_supervisord
+    volumes:
+      - ..:/assembl
+    command: "sh -c '. venv/bin/activate && supervisorctl tail -f celery_notify_beat stderr'"
+    depends_on:
+      - supervisord
+    restart: always
+  celery_notify_beat-stdout:
+    image: devas_supervisord
+    volumes:
+      - ..:/assembl
+    command: "sh -c '. venv/bin/activate && supervisorctl tail -f celery_notify_beat stdout'"
+    depends_on:
+      - supervisord
+    restart: always
