@@ -127,7 +127,7 @@ services:
       - supervisord
     restart: always
   celery_notification_dispatch-stdout:
-    image: assembl_supervisor
+    image: devas_supervisord
     volumes:
       - ..:/assembl
     command: "sh -c '. venv/bin/activate && supervisorctl tail -f celery_notification_dispatch stdout'"
