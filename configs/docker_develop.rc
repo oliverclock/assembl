@@ -13,3 +13,8 @@ redis_host = redis
 memcached_host = memcached
 
 webpack_bound_address = 0.0.0.0
+
+smtp_host = smtp
+mail.host = smtp
+mail.port = 5025
+mail.tls = false

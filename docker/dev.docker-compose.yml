@@ -66,6 +66,10 @@ services:
     image: chorss/docker-pgadmin4:2.0
     ports:
       - 5050:5050
+  smtp:
+    image: gessnerfl/fake-smtp-server:0.6.0
+    ports:
+      - 5080:5080
   webpack-stdout:
     image: devas_supervisord
     volumes:
