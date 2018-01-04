@@ -1,5 +1,7 @@
 _extends = develop.rc
 
+// do NOT use this config in any server open to the public! it's swiss cheese
+
 *db_host = database
 
 elasticsearch_host = elasticsearch
