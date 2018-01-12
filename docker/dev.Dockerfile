@@ -39,6 +39,8 @@ RUN ssh-keygen -P '' -f ~/.ssh/id_rsa && \
 RUN apt-get update && apt-get install -y \
       fish \
       links2 \
+      man \
+      nano \
     # Clear the image cache
     && rm -rf /var/lib/apt/lists/*
     
