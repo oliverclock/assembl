@@ -1,4 +1,6 @@
+import csv
 import re
+import tempfile
 import base64
 from cStringIO import StringIO
 from os import urandom
@@ -29,7 +31,7 @@ import transaction
 
 
 import simplejson as json
-from pyramid.response import Response
+from pyramid.response import FileIter, Response
 from pyramid.view import view_config
 from pyramid.httpexceptions import (
     HTTPOk, HTTPBadRequest, HTTPUnauthorized, HTTPNotAcceptable, HTTPFound,
@@ -51,8 +53,10 @@ from assembl.auth import (
     R_ADMINISTRATOR)
 from assembl.auth.password import verify_data_token, data_token, Validity
 from assembl.auth.util import get_permissions
+from assembl.graphql.schema import resolve_langstring
 from assembl.models import (Discussion, Permission)
 from assembl.models.auth import create_default_permissions
+from assembl.utils import format_date, get_thematics, get_published_posts, get_ideas
 from ..traversal import InstanceContext, ClassContext
 from . import (JSON_HEADER, FORM_HEADER, CreationResponse)
 from ..api.discussion import etalab_discussions, API_ETALAB_DISCUSSIONS_PREFIX
@@ -1522,6 +1526,203 @@ def get_participant_time_series_analytics(request):
         rows.append(row)
 
     return csv_response(rows, format)
+
+
+def convert_to_utf8(rowdict):
+    row = {}
+    for key, value in rowdict.items():
+        row[key.encode('utf-8')] = value.encode('utf-8') if isinstance(value, unicode) else value
+
+    return row
+
+
+@view_config(context=InstanceContext, request_method='GET',
+             ctx_instance_class=Discussion, permission=P_ADMIN_DISC,
+             name="phase1_csv_export")
+def phase1_csv_export(request):
+    """CSV export for phase 1."""
+    from assembl.models import Locale
+    has_lang = 'lang' in request.GET
+    if has_lang:
+        language = request.GET['lang']
+        exists = Locale.get_id_of(language, create=False)
+        if not exists:
+            language = u'fr'
+    else:
+        language = u'fr'
+    discussion_id = request.context.get_discussion_id()
+    THEMATIC_NAME = u"Nom de la thématique"
+    QUESTION_ID = u"Numéro de la question"
+    QUESTION_TITLE = u"Intitulé de la question"
+    POST_BODY = u"Réponse"
+    POST_LIKE_COUNT = u"Nombre de \"J'aime\""
+    POST_DISAGREE_COUNT = u"Nombre de \"En désaccord\""
+    POST_CREATOR_NAME = u"Nom du contributeur"
+    POST_CREATOR_EMAIL = u"Adresse mail du contributeur"
+    POST_CREATION_DATE = u"Date/heure du post"
+    SENTIMENT_ACTOR_NAME = u"Nom du votant"
+    SENTIMENT_ACTOR_EMAIL = u"Adresse mail du votant"
+    SENTIMENT_CREATION_DATE = u"Date/heure du vote"
+    fieldnames = [
+        THEMATIC_NAME.encode('utf-8'),
+        QUESTION_ID.encode('utf-8'),
+        QUESTION_TITLE.encode('utf-8'),
+        POST_BODY.encode('utf-8'),
+        POST_LIKE_COUNT.encode('utf-8'),
+        POST_DISAGREE_COUNT.encode('utf-8'),
+        POST_CREATOR_NAME.encode('utf-8'),
+        POST_CREATOR_EMAIL.encode('utf-8'),
+        POST_CREATION_DATE.encode('utf-8'),
+        SENTIMENT_ACTOR_NAME.encode('utf-8'),
+        SENTIMENT_ACTOR_EMAIL.encode('utf-8'),
+        SENTIMENT_CREATION_DATE.encode('utf-8'),
+    ]
+
+    output = tempfile.NamedTemporaryFile('w+b', delete=True)
+    # include BOM for Excel to open the file in UTF-8 properly
+    output.write(u'\ufeff'.encode('utf-8'))
+    writer = csv.DictWriter(
+        output, dialect='excel', delimiter=';', fieldnames=fieldnames)
+    writer.writeheader()
+    thematics = get_thematics(discussion_id, 'survey')
+    for thematic in thematics:
+        row = {}
+        row[THEMATIC_NAME] = resolve_langstring(thematic.title, language)
+        for question in thematic.get_children():
+            row[QUESTION_ID] = question.id
+            row[QUESTION_TITLE] = resolve_langstring(question.title, language)
+            posts = get_published_posts(question)
+            for post in posts:
+                if has_lang:
+                    row[POST_BODY] = resolve_langstring(
+                        post.get_body_as_text(), language)
+                else:
+                    row[POST_BODY] = resolve_langstring(
+                        post.get_body_as_text(), None)
+                row[POST_CREATOR_NAME] = post.creator.name
+                row[POST_CREATOR_EMAIL] = post.creator.get_preferred_email()
+                row[POST_CREATION_DATE] = format_date(post.creation_date)
+                row[POST_LIKE_COUNT] = post.like_count
+                row[POST_DISAGREE_COUNT] = post.disagree_count
+                if not post.sentiments:
+                    row[SENTIMENT_ACTOR_NAME] = u''
+                    row[SENTIMENT_ACTOR_EMAIL] = u''
+                    row[SENTIMENT_CREATION_DATE] = u''
+                    writer.writerow(convert_to_utf8(row))
+
+                for sentiment in post.sentiments:
+                    row[SENTIMENT_ACTOR_NAME] = sentiment.actor.name
+                    row[SENTIMENT_ACTOR_EMAIL] = sentiment.actor.get_preferred_email()
+                    row[SENTIMENT_CREATION_DATE] = format_date(
+                        sentiment.creation_date)
+                    writer.writerow(convert_to_utf8(row))
+
+    output.seek(0)
+    response = request.response
+    filename = 'phase1_export'
+    response.content_type = 'application/vnd.ms-excel'
+    response.content_disposition = 'attachment; filename="{}.csv"'.format(
+        filename)
+    response.app_iter = FileIter(output)
+    return response
+
+
+@view_config(context=InstanceContext, request_method='GET',
+             ctx_instance_class=Discussion, permission=P_ADMIN_DISC,
+             name="phase2_csv_export")
+def phase2_csv_export(request):
+    """CSV export for phase 2."""
+    from assembl.models import Locale
+    has_lang = 'lang' in request.GET
+    if has_lang:
+        language = request.GET['lang']
+        exists = Locale.get_id_of(language, create=False)
+        if not exists:
+            language = u'fr'
+    else:
+        language = u'fr'
+
+    discussion_id = request.context.get_discussion_id()
+    IDEA_ID = u"Numéro de l'idée"
+    IDEA_NAME = u"Nom de l'idée"
+    POST_SUBJECT = u"Sujet"
+    POST_BODY = u"Post"
+    POST_LIKE_COUNT = u"Nombre de \"J'aime\""
+    POST_DISAGREE_COUNT = u"Nombre de \"En désaccord\""
+    POST_CREATOR_NAME = u"Nom du contributeur"
+    POST_CREATOR_EMAIL = u"Adresse mail du contributeur"
+    POST_CREATION_DATE = u"Date/heure du post"
+    SENTIMENT_ACTOR_NAME = u"Nom du votant"
+    SENTIMENT_ACTOR_EMAIL = u"Adresse mail du votant"
+    SENTIMENT_CREATION_DATE = u"Date/heure du vote"
+    fieldnames = [
+        IDEA_ID.encode('utf-8'),
+        IDEA_NAME.encode('utf-8'),
+        POST_SUBJECT.encode('utf-8'),
+        POST_BODY.encode('utf-8'),
+        POST_LIKE_COUNT.encode('utf-8'),
+        POST_DISAGREE_COUNT.encode('utf-8'),
+        POST_CREATOR_NAME.encode('utf-8'),
+        POST_CREATOR_EMAIL.encode('utf-8'),
+        POST_CREATION_DATE.encode('utf-8'),
+        SENTIMENT_ACTOR_NAME.encode('utf-8'),
+        SENTIMENT_ACTOR_EMAIL.encode('utf-8'),
+        SENTIMENT_CREATION_DATE.encode('utf-8'),
+    ]
+
+    output = tempfile.NamedTemporaryFile('w+b', delete=True)
+    # include BOM for Excel to open the file in UTF-8 properly
+    output.write(u'\ufeff'.encode('utf-8'))
+    writer = csv.DictWriter(
+        output, dialect='excel', delimiter=';', fieldnames=fieldnames)
+    writer.writeheader()
+    ideas = get_ideas(discussion_id, 'thread')
+    for idea in ideas:
+        row = {}
+        row[IDEA_ID] = idea.id
+        row[IDEA_NAME] = resolve_langstring(idea.title, language)
+        posts = get_published_posts(idea)
+        for post in posts:
+            if has_lang:
+                row[POST_SUBJECT] = resolve_langstring(
+                    post.subject, language)
+            else:
+                row[POST_SUBJECT] = resolve_langstring(
+                    post.subject, None)
+
+            if has_lang:
+                row[POST_BODY] = resolve_langstring(
+                    post.get_body_as_text(), language)
+            else:
+                row[POST_BODY] = resolve_langstring(
+                    post.get_body_as_text(), None)
+
+            row[POST_CREATOR_NAME] = post.creator.name
+            row[POST_CREATOR_EMAIL] = post.creator.get_preferred_email()
+            row[POST_CREATION_DATE] = format_date(post.creation_date)
+            row[POST_LIKE_COUNT] = post.like_count
+            row[POST_DISAGREE_COUNT] = post.disagree_count
+            if not post.sentiments:
+                row[SENTIMENT_ACTOR_NAME] = u''
+                row[SENTIMENT_ACTOR_EMAIL] = u''
+                row[SENTIMENT_CREATION_DATE] = u''
+                writer.writerow(convert_to_utf8(row))
+
+            for sentiment in post.sentiments:
+                row[SENTIMENT_ACTOR_NAME] = sentiment.actor.name
+                row[SENTIMENT_ACTOR_EMAIL] = sentiment.actor.get_preferred_email()
+                row[SENTIMENT_CREATION_DATE] = format_date(
+                    sentiment.creation_date)
+                writer.writerow(convert_to_utf8(row))
+
+    output.seek(0)
+    response = request.response
+    filename = 'phase2_export'
+    response.content_type = 'application/vnd.ms-excel'
+    response.content_disposition = 'attachment; filename="{}.csv"'.format(
+        filename)
+    response.app_iter = FileIter(output)
+    return response
 
 
 def includeme(config):
