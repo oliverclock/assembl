@@ -1681,7 +1681,7 @@ def phase2_csv_export(request):
     for idea in ideas:
         row = {}
         row[IDEA_ID] = idea.id
-        row[IDEA_NAME] = resolve_langstring(idea.title, language)
+        row[IDEA_NAME] = idea.short_title
         posts = get_published_posts(idea)
         for post in posts:
             if has_lang:

@@ -49,9 +49,7 @@ def get_ideas(discussion_id, phase_id):
             model.sqla_type == 'idea',
             model.tombstone_date == None  # noqa: E711
         ).options(
-            contains_eager(models.Idea.source_links),
-            joinedload(models.Idea.title).joinedload("entries"),
-            joinedload(models.Idea.description).joinedload("entries"),
+            contains_eager(models.Idea.source_links)
         ).order_by(models.IdeaLink.order, models.Idea.creation_date)
     if phase_id == 'multiColumns':
         # Filter out ideas that don't have columns.
