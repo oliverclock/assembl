@@ -37,7 +37,8 @@ from assembl.lib.sqla_types import EmailString
 from assembl.models.action import SentimentOfPost
 from assembl.models.post import countable_publication_states
 from assembl.nlp.translation_service import DummyGoogleTranslationService
-
+from assembl.graphql.permissions_helpers import require_instance_permission
+from assembl.auth import CrudPermissions
 
 convert_sqlalchemy_type.register(EmailString)(convert_column_to_string)
 models.Base.query = models.Base.default_db.query_property()
@@ -115,11 +116,12 @@ class Query(graphene.ObjectType):
         return root_thematic
 
     def resolve_vote_session(self, args, context, info):
-
         discussion_phase_id = args.get('discussion_phase_id')
         discussion_phase = models.DiscussionPhase.get(discussion_phase_id)
-        # TODO: see if we can avoid this next(iter( thing with a one-to-one relationship
-        vote_session = next(iter(discussion_phase.vote_session or []), None)
+        require_instance_permission(CrudPermissions.READ, discussion_phase, context)
+        vote_session = discussion_phase.vote_session
+        if vote_session is not None:
+            require_instance_permission(CrudPermissions.READ, vote_session, context)
         return vote_session
 
     def resolve_ideas(self, args, context, info):
@@ -238,10 +240,14 @@ class Query(graphene.ObjectType):
         return text and len(text) > 10
 
     def resolve_visits_analytics(self, args, context, info):
-        fields = get_fields(info)
-        if 'sumVisitsLength' in fields and 'nbPageviews' in fields and 'nbUniqPageviews' in fields:
-            return VisitsAnalytics.build_from_full_query(args, context, info)
-        else:
+        try:
+            fields = get_fields(info)
+            if 'sumVisitsLength' in fields and 'nbPageviews' in fields and 'nbUniqPageviews' in fields:
+                return VisitsAnalytics.build_from_full_query(args, context, info)
+            else:
+                return VisitsAnalytics()
+        except Exception:
+            context.logger().exception('Error with Matomo request')
             return VisitsAnalytics()
 
     def resolve_discussion(self, args, context, info):

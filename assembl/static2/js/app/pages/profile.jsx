@@ -6,6 +6,7 @@ import { compose, graphql } from 'react-apollo';
 import { Translate, I18n } from 'react-redux-i18n';
 import { Grid, Col, Button } from 'react-bootstrap';
 import FormControlWithLabel from '../components/common/formControlWithLabel';
+import ModifyPasswordForm from '../components/common/modifyPasswordForm';
 import { get, getContextual } from '../utils/routeMap';
 import { displayAlert } from '../utils/utilityManager';
 import withLoadingIndicator from '../components/common/withLoadingIndicator';
@@ -18,6 +19,7 @@ type ProfileProps = {
   email: string,
   connectedUserId: string,
   creationDate: ?string,
+  lang: string,
   slug: string,
   userId: string,
   id: string,
@@ -29,7 +31,8 @@ type ProfileProps = {
 type ProfileState = {
   username: string,
   name: string,
-  email: string
+  email: string,
+  passwordEditionOpen: boolean
 };
 
 class Profile extends React.PureComponent<*, ProfileProps, ProfileState> {
@@ -47,7 +50,8 @@ class Profile extends React.PureComponent<*, ProfileProps, ProfileState> {
     this.state = {
       username: username,
       name: name,
-      email: email
+      email: email,
+      passwordEditionOpen: false
     };
   }
 
@@ -92,17 +96,16 @@ class Profile extends React.PureComponent<*, ProfileProps, ProfileState> {
   };
 
   handlePasswordClick = () => {
-    const { slug } = this.props;
-    browserHistory.push(get('ctxRequestPasswordChange', { slug: slug }));
+    this.setState({ passwordEditionOpen: true });
   };
 
   render() {
     const { username, name, email } = this.state;
-    const { creationDate } = this.props;
+    const { creationDate, lang, id } = this.props;
     const fullNameLabel = I18n.t('profile.fullname');
     const emailLabel = I18n.t('profile.email');
     return (
-      <div className="profile">
+      <div className="profile background-dark-grey">
         <div className="content-section">
           <Grid fluid>
             <div className="max-container">
@@ -110,9 +113,9 @@ class Profile extends React.PureComponent<*, ProfileProps, ProfileState> {
                 <div className="center">
                   <span className="assembl-icon-profil" />
                 </div>
-                <h3 className="dark-title-3 capitalized center">{this.props.name}</h3>
+                <h2 className="dark-title-2 capitalized center">{this.props.name}</h2>
                 {creationDate && (
-                  <div className="center member-since">
+                  <div className={`center member-since lang-${lang}`}>
                     <Translate value="profile.memberSince" date={I18n.l(creationDate, { dateFormat: 'date.format2' })} />
                   </div>
                 )}
@@ -122,9 +125,9 @@ class Profile extends React.PureComponent<*, ProfileProps, ProfileState> {
                   <h1 className="dark-title-1">
                     <Translate value="profile.panelTitle" />
                   </h1>
-                  <h3 className="dark-title-3 margin-l">
+                  <h2 className="dark-title-2 margin-l">
                     <Translate value="profile.personalInfos" />
-                  </h3>
+                  </h2>
                   <div className="profile-form center">
                     <FormControlWithLabel
                       label={I18n.t('profile.userName')}
@@ -150,13 +153,17 @@ class Profile extends React.PureComponent<*, ProfileProps, ProfileState> {
                       <Translate value="profile.save" />
                     </Button>
                   </div>
-                  <h3 className="dark-title-3 margin-l">
+                  <h2 className="dark-title-2 margin-l">
                     <Translate value="profile.password" />
-                  </h3>
+                  </h2>
                   <div className="profile-form center">
-                    <Button className="button-submit button-dark" onClick={this.handlePasswordClick}>
-                      <Translate value="profile.changePassword" />
-                    </Button>
+                    {this.state.passwordEditionOpen ? (
+                      <ModifyPasswordForm id={id} successCallback={() => this.setState({ passwordEditionOpen: false })} />
+                    ) : (
+                      <Button className="button-submit button-dark" onClick={this.handlePasswordClick}>
+                        <Translate value="profile.changePassword" />
+                      </Button>
+                    )}
                   </div>
                 </div>
               </Col>
@@ -168,12 +175,13 @@ class Profile extends React.PureComponent<*, ProfileProps, ProfileState> {
   }
 }
 
-const mapStateToProps = ({ context, debate }, ownProps) => {
+const mapStateToProps = ({ context, debate, i18n }, ownProps) => {
   const userId = ownProps.params.userId;
   return {
     slug: debate.debateData.slug,
     connectedUserId: context.connectedUserId,
-    id: btoa(`AgentProfile:${userId}`)
+    id: btoa(`AgentProfile:${userId}`),
+    lang: i18n.locale
   };
 };
 

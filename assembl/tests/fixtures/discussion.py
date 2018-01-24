@@ -32,6 +32,11 @@ def discussion(request, test_session, default_preferences):
         # create_default_discussion_data, create_default_discussion_sections
         # or create_default_permissions in your specific test or
         # use discussion_with_default_data fixture.
+        # If you do permissions tests, be aware that the admin user
+        # having R_SYSADMIN is actually a special case, see
+        # auth/utils.py:get_permissions, it doesn't use discussion permissions
+        # at all. So you need discussion permissions if you test with the
+        # unauthenticated user Everyone or a user not having the R_SYSADMIN role.
     test_session.flush()
 
     def fin():
@@ -58,10 +63,18 @@ def discussion(request, test_session, default_preferences):
 
 
 @pytest.fixture(scope="function")
-def discussion_with_default_data(discussion, test_session):
+def discussion_with_default_data(request, discussion, test_session):
     from assembl.lib.migration import create_default_discussion_data
     create_default_discussion_data(discussion)
     test_session.flush()
+
+    def fin():
+        for acl in discussion.acls:
+            test_session.delete(acl)
+        for section in discussion.sections:
+            test_session.delete(section)
+        test_session.flush()
+    request.addfinalizer(fin)
     return discussion
 
 
@@ -115,8 +128,28 @@ def closed_discussion(request, test_session, discussion):
     role = test_session.query(Role).filter_by(name=R_PARTICIPANT).first()
     # Take the read for everyone, put it on participant
     dp = test_session.query(DiscussionPermission).join(Permission).filter(
-        DiscussionPermission.discussion==discussion, Permission.name==P_READ).first()
+        DiscussionPermission.discussion == discussion, Permission.name == P_READ).first()
     dp.role = role
     test_session.commit()
 
+    def fin():
+        for acl in discussion.acls:
+            test_session.delete(acl)
+        test_session.flush()
+    request.addfinalizer(fin)
+    return discussion
+
+
+@pytest.fixture(scope="function")
+def discussion_with_permissions(request, test_session, discussion):
+    """An empty Discussion fixture with default permissions"""
+    from assembl.models.auth import create_default_permissions
+    create_default_permissions(discussion)
+    test_session.flush()
+
+    def fin():
+        for ul in discussion.acls:
+            ul.delete()
+        test_session.flush()
+    request.addfinalizer(fin)
     return discussion
