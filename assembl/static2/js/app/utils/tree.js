@@ -1,5 +1,9 @@
 // @flow
 
+type ItemType = {
+  parentId: string
+};
+
 type NodeType = {
   id: string,
   ancestors: Array<string>
@@ -34,4 +38,14 @@ export function getPartialTree<T: NodeType>(nodes: Array<T>): TreeType<T> {
     roots: roots,
     descendants: descendants
   };
+}
+
+/**
+ * @param {T: ItemType} The type of the items
+ * @param {T} The item id.
+ * @param {Array<T>} An array of items.
+ * @returns {Array<T>} Returns the direct child items of the item.
+ */
+export function getChildrenFromArray<T: ItemType>(itemId: string, items: Array<T>): Array<T> {
+  return itemId ? items.filter(item => item.parentId === itemId) : items;
 }

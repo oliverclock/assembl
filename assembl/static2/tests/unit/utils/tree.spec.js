@@ -1,4 +1,4 @@
-import { getChildren, getPartialTree } from '../../../js/app/utils/tree';
+import { getChildren, getPartialTree, getChildrenFromArray } from '../../../js/app/utils/tree';
 
 describe('Tree', () => {
   describe('Children getter', () => {
@@ -22,6 +22,28 @@ describe('Tree', () => {
       const ids = descendants.map(c => c.id);
       const expected = ['bar', 'tar'];
       expect(ids).toEqual(expect.arrayContaining(expected));
+    });
+  });
+
+  describe('Children from array', () => {
+    it('should return the fooBar item', () => {
+      const items = [
+        {
+          id: 'foo',
+          parentId: 'root'
+        },
+        {
+          id: 'fooBar',
+          parentId: 'foo'
+        },
+        {
+          id: 'bar',
+          parentId: 'root'
+        }
+      ];
+      const children = getChildrenFromArray('foo', items);
+      expect(children.length).toEqual(1);
+      expect(children[0].id).toEqual('fooBar');
     });
   });
 });
