@@ -669,6 +669,12 @@
       "src": "fontawesome"
     },
     {
+      "uid": "58b78b6ca784d5c3db5beefcd9e18061",
+      "css": "left-small",
+      "code": 59414,
+      "src": "typicons"
+    },
+    {
       "uid": "8042c2d234f549346b152cfcf45b16c5",
       "css": "facebook",
       "code": 59397,
