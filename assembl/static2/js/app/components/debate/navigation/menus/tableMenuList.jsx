@@ -2,12 +2,8 @@
 import React from 'react';
 import classNames from 'classnames';
 
-import MenuItem from '../menuItem';
-
-export type ItemNode = {
-  id: string,
-  parentId: string
-};
+import TableMenuItem from './tableMenuItem';
+import { type ItemNode } from '.';
 
 type MenuListProps = {
   items: Array<ItemNode>,
@@ -21,7 +17,7 @@ type MenuListState = {
   selected: string
 };
 
-class MenuList extends React.Component<*, MenuListProps, MenuListState> {
+class TableMenuList extends React.Component<*, MenuListProps, MenuListState> {
   props: MenuListProps;
 
   static defaultProps = {
@@ -59,7 +55,7 @@ class MenuList extends React.Component<*, MenuListProps, MenuListState> {
       <div className={classNames('menu-table-col', className)}>
         <div className="menu-table">
           {rootItems.map(item => (
-            <MenuItem
+            <TableMenuItem
               key={item.id}
               hasSubItems={items.some(listItem => listItem.parentId === item.id)}
               selected={item.id === selected}
@@ -71,7 +67,7 @@ class MenuList extends React.Component<*, MenuListProps, MenuListState> {
           ))}
         </div>
         {selected && (
-          <MenuList
+          <TableMenuList
             onMenuItemClick={onMenuItemClick}
             className="sub-menu"
             items={items}
@@ -84,4 +80,4 @@ class MenuList extends React.Component<*, MenuListProps, MenuListState> {
   }
 }
 
-export default MenuList;
+export default TableMenuList;

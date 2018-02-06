@@ -1,7 +1,7 @@
 import React from 'react';
 import ShallowRenderer from 'react-test-renderer/shallow';
 
-import MenuTable from '../../../../../js/app/components/debate/navigation/menuTable';
+import Menu from '../../../../../../js/app/components/debate/navigation/menus/menu';
 
 describe('MenuTable component', () => {
   it('should match the survey table', () => {
@@ -9,7 +9,7 @@ describe('MenuTable component', () => {
       identifier: 'survey'
     };
     const renderer = new ShallowRenderer();
-    renderer.render(<MenuTable {...props} />);
+    renderer.render(<Menu {...props} />);
     const rendered = renderer.getRenderOutput();
     expect(rendered).toMatchSnapshot();
   });
@@ -19,7 +19,7 @@ describe('MenuTable component', () => {
       identifier: 'foo'
     };
     const renderer = new ShallowRenderer();
-    renderer.render(<MenuTable {...props} />);
+    renderer.render(<Menu {...props} />);
     const rendered = renderer.getRenderOutput();
     expect(rendered).toMatchSnapshot();
   });

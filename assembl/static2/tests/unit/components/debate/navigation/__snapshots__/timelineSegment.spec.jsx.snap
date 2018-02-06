@@ -3,9 +3,18 @@
 exports[`DumbTimeline component should match the DumbTimeline 1`] = `
 <div
   className="minimized-timeline"
+  onClick={undefined}
   onMouseLeave={[Function]}
   onMouseOver={[Function]}
 >
+  <div
+    className="timeline-title txt-active-light"
+    onClick={[Function]}
+  >
+    <div
+      className="timeline-link"
+    />
+  </div>
   <div
     className="timeline-graph"
   >

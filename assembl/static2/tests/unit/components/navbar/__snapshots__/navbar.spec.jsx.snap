@@ -10,7 +10,7 @@ exports[`AssemblNavbar component should render a BurgerNavbar and a hidden FlatN
     fluid={true}
   >
     <div
-      className="nav-bar max-container"
+      className="nav-bar max-container small"
       id="navbar"
     >
       <BurgerNavbar
@@ -22,6 +22,7 @@ exports[`AssemblNavbar component should render a BurgerNavbar and a hidden FlatN
                       "displayDebateModal": [Function],
                       "phase": "thread",
                       "phaseContext": "new",
+                      "screenTooSmall": true,
                       "slug": undefined,
                     }
               }
@@ -51,6 +52,7 @@ exports[`AssemblNavbar component should render a BurgerNavbar and a hidden FlatN
                       "displayDebateModal": [Function],
                       "phase": "thread",
                       "phaseContext": "new",
+                      "screenTooSmall": true,
                       "slug": undefined,
                     }
               }
@@ -107,6 +109,7 @@ exports[`AssemblNavbar component should render a FlatNavbar with a big screenWid
                       "displayDebateModal": [Function],
                       "phase": "thread",
                       "phaseContext": "new",
+                      "screenTooSmall": false,
                       "slug": undefined,
                     }
               }

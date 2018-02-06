@@ -4,6 +4,32 @@
   background-color: $navbar-bkg;
   height: $navbar-height;
 
+  &.small {
+    .navbar-menu-item {
+      position: relative;
+      color: #333;
+      font-size: 14px;
+
+      .thumb-arrow {
+        position: absolute;
+        width: 35px;
+        text-align: center;
+        top: 3px;
+        right: calc(25% - 40px);
+
+        &::before {
+          font-size: 14px;
+        }
+      }
+
+      &.selected {
+        background-color: $first-color-light;
+        font-weight: bold;
+        color: $first-color !important;
+      }
+    }
+  }
+
   .sk-layout {
     float: none;
 

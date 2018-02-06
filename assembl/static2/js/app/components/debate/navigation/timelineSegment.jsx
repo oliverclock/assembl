@@ -6,11 +6,12 @@ import { Translate, Localize, I18n } from 'react-redux-i18n';
 import { connect } from 'react-redux';
 import classNames from 'classnames';
 
-import MenuTable, { prefetchMenuQuery } from './menuTable';
+import Menu, { prefetchMenuQuery } from './menus/menu';
 import { getPhaseStatus, isSeveralIdentifiers, type Timeline } from '../../../utils/timeline';
 import { displayModal } from '../../../utils/utilityManager';
 import { get } from '../../../utils/routeMap';
 import { PHASE_STATUS } from '../../../constants';
+import { MENU_KINDS } from './menus';
 
 export type DebateType = {
   debateData: {
@@ -20,6 +21,7 @@ export type DebateType = {
 };
 
 type TimelineSegmentProps = {
+  index: number,
   client: ApolloClient,
   title: {
     entries: Array<*>
@@ -29,8 +31,13 @@ type TimelineSegmentProps = {
   phaseIdentifier: string,
   debate: DebateType,
   barPercent: number,
+  isCurrentPhase: boolean,
+  isStepCompleted: boolean,
   locale: string,
-  onMenuItemClick: Function
+  vertical: boolean,
+  onMenuItemClick: Function,
+  onShowMenu: Function,
+  onHideMenu: Function
 };
 
 type TimelineSegmentState = {
@@ -46,27 +53,49 @@ export class DumbTimelineSegment extends React.Component<*, TimelineSegmentProps
     const { phaseIdentifier, title, startDate, endDate, locale, client } = this.props;
     this.phaseStatus = getPhaseStatus(startDate, endDate);
     let phaseName = '';
+    let phaseTitle = '';
     title.entries.forEach((entry) => {
       if (locale === entry['@language']) {
+        phaseTitle = entry.value;
         phaseName = entry.value.toLowerCase();
       }
     });
     this.phaseName = phaseName;
+    this.phaseTitle = phaseTitle;
     prefetchMenuQuery(client, {
       lang: locale,
       identifier: phaseIdentifier
     });
   }
 
+  componentWillReceiveProps() {
+    if (this.state.active) {
+      this.setState({ active: false });
+    }
+  }
+
   phaseStatus = null;
 
   phaseName = null;
 
-  showMenu = () => {
-    this.setState({ active: true });
+  phaseTitle = null;
+
+  showMenu = (event: SyntheticMouseEvent<>) => {
+    this.setState({ active: true }, () => {
+      const { onShowMenu, phaseIdentifier } = this.props;
+      if (onShowMenu) onShowMenu({ id: phaseIdentifier, title: this.phaseTitle });
+    });
+    if (this.props.vertical && event) event.preventDefault();
   };
 
   hideMenu = () => {
+    this.setState({ active: false }, () => {
+      const { onHideMenu } = this.props;
+      if (onHideMenu) onHideMenu();
+    });
+  };
+
+  close = () => {
     this.setState({ active: false });
   };
 
@@ -115,7 +144,7 @@ export class DumbTimelineSegment extends React.Component<*, TimelineSegmentProps
   };
 
   renderMenu = () => {
-    const { phaseIdentifier, onMenuItemClick } = this.props;
+    const { phaseIdentifier, onMenuItemClick, vertical } = this.props;
     const { active } = this.state;
     const isNotStarted = this.phaseStatus === PHASE_STATUS.notStarted;
     if (!active) return null;
@@ -124,40 +153,78 @@ export class DumbTimelineSegment extends React.Component<*, TimelineSegmentProps
         {isNotStarted ? (
           this.renderNotStarted('not-started')
         ) : (
-          <MenuTable identifier={phaseIdentifier} onMenuItemClick={onMenuItemClick} />
+          <Menu
+            identifier={phaseIdentifier}
+            onMenuItemClick={onMenuItemClick}
+            kind={vertical ? MENU_KINDS.index : MENU_KINDS.table}
+          />
         )}
       </div>
     );
   };
 
   render() {
-    const { barPercent, title, locale } = this.props;
+    const { index, barPercent, isCurrentPhase, isStepCompleted, vertical } = this.props;
     const { active } = this.state;
-    const timelineClass = 'timeline-title txt-active-light';
+    const timelineClass = classNames('timeline-title', {
+      'txt-active-bold': vertical && isCurrentPhase,
+      'txt-active-light': !vertical || (vertical && isStepCompleted),
+      'txt-not-active': vertical && !isCurrentPhase && !isStepCompleted
+    });
+    const complitedOrCurrent = isStepCompleted || isCurrentPhase;
+    const dimensionName = vertical ? 'height' : 'width';
+    if (vertical && active) return this.renderMenu();
     return (
       <div
         className={classNames('minimized-timeline', {
           active: active
         })}
-        onMouseOver={this.showMenu}
-        onMouseLeave={this.hideMenu}
+        onMouseOver={!vertical && this.showMenu}
+        onMouseLeave={!vertical && this.hideMenu}
+        onClick={vertical && this.showMenu}
       >
-        {title.entries.filter(entry => locale === entry['@language']).map((entry, index) => (
-          <div onClick={this.displayPhase} className={timelineClass} key={index}>
-            <div className="timeline-link">{entry.value}</div>
-          </div>
-        ))}
+        <div onClick={this.displayPhase} className={timelineClass}>
+          <div className="timeline-link">{this.phaseTitle}</div>
+          {vertical && (
+            <div className="timeline-link-description">
+              {isStepCompleted && I18n.t('debate.phaseCompleted')}
+              {isCurrentPhase && I18n.t('debate.phaseStarted')}
+              {!complitedOrCurrent && I18n.t('debate.phaseUpcoming')}
+            </div>
+          )}
+        </div>
         <div className="timeline-graph">
+          {vertical && (
+            <div
+              className={classNames('timeline-number', {
+                active: complitedOrCurrent,
+                'not-active': !complitedOrCurrent,
+                'timeline-text': !isStepCompleted
+              })}
+            >
+              {isStepCompleted ? (
+                <span className="assembl-icon-checked white" />
+              ) : (
+                <span>
+                  {isCurrentPhase && <span className="thumb-arrow assembl-icon assembl-icon-right-dir" />}
+                  {index + 1}
+                </span>
+              )}
+            </div>
+          )}
           <div className="timeline-bars">
             {barPercent > 0 && (
-              <div className="timeline-bar-filler" style={barPercent < 20 ? { width: '20%' } : { width: `${barPercent}%` }}>
+              <div
+                className="timeline-bar-filler"
+                style={barPercent < 20 ? { [dimensionName]: '20%' } : { [dimensionName]: `${barPercent}%` }}
+              >
                 &nbsp;
               </div>
             )}
             <div className="timeline-bar-background">&nbsp;</div>
           </div>
         </div>
-        {active && <span className="timeline-arrow" />}
+        {!vertical && active && <span className="timeline-arrow" />}
         {this.renderMenu()}
       </div>
     );
@@ -170,4 +237,4 @@ const mapStateToProps = state => ({
 });
 
 // $FlowFixMe
-export default connect(mapStateToProps)(withApollo(DumbTimelineSegment));
+export default connect(mapStateToProps, null, null, { withRef: true })(withApollo(DumbTimelineSegment, { withRef: true }));

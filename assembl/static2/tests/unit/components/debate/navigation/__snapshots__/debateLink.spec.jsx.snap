@@ -8,14 +8,18 @@ exports[`DebateLink component should match the DebateLink 1`] = `
 >
   <Link
     activeClassName="debate-class-active"
-    className="debate-class"
+    className="debate-link-title debate-class"
     data-text="Debate"
     onlyActiveOnIndex={false}
     style={Object {}}
     to="https://foo.bar"
   >
-    <span>
-      Debate
+    <span
+      className={undefined}
+    >
+      <span>
+        Debate
+      </span>
     </span>
   </Link>
   <div
@@ -30,8 +34,11 @@ exports[`DebateLink component should match the DebateLink 1`] = `
       >
         <Connect(DumbTimeline)
           identifier="survey"
+          onMenuClosed={undefined}
           onMenuItemClick={[Function]}
+          onMenuShown={undefined}
           showNavigation={true}
+          vertical={undefined}
         />
       </div>
     </section>

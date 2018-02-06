@@ -1,0 +1,45 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`DumbIdeasIndex component should match a closed menu item 1`] = `
+<div
+  className="index-container"
+>
+  <div
+    className="index-item-container"
+  >
+    <Link
+      className="index-item"
+      onlyActiveOnIndex={false}
+      style={Object {}}
+      to="/slug/debate/survey/theme/fooId"
+    >
+      1. Foo
+    </Link>
+    <DumbIdeasIndex
+      className="sub-index sub-index-1"
+      identifier="survey"
+      indexGenerator={[Function]}
+      items={
+        Array [
+          Object {
+            "id": "fooId",
+            "parentId": "rootId",
+            "title": "Foo",
+          },
+          Object {
+            "id": "barId",
+            "parentId": "fooId",
+            "title": "Bar",
+          },
+        ]
+      }
+      parents={
+        Array [
+          1,
+        ]
+      }
+      rootItem="fooId"
+    />
+  </div>
+</div>
+`;

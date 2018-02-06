@@ -4,18 +4,9 @@ import { Link } from 'react-router';
 import { connect } from 'react-redux';
 import classNames from 'classnames';
 
-import { get } from '../../../utils/routeMap';
-import PostsAndContributorsCount from '../../common/postsAndContributorsCount';
-
-type ItemNode = {
-  id: string,
-  title: string,
-  img: {
-    externalUrl: string
-  },
-  numContributors: number,
-  numPosts: number
-};
+import { get } from '../../../../utils/routeMap';
+import PostsAndContributorsCount from '../../../common/postsAndContributorsCount';
+import { type ItemNode } from '.';
 
 type MenuItemProps = {
   item: ItemNode,
@@ -32,7 +23,7 @@ type MenuItemState = {
   active: boolean
 };
 
-export class DumbMenuItem extends React.Component<*, MenuItemProps, MenuItemState> {
+export class DumbTableMenuItem extends React.Component<*, MenuItemProps, MenuItemState> {
   state = {
     active: false
   };
@@ -91,4 +82,4 @@ const mapStateToProps = state => ({
   slug: state.debate.debateData.slug
 });
 
-export default connect(mapStateToProps)(DumbMenuItem);
+export default connect(mapStateToProps)(DumbTableMenuItem);

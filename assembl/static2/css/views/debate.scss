@@ -1,17 +1,64 @@
-.debate-link.active {
-  > .navbar-menu-item {
-    background-color: $first-color;
-    color: $white !important;
-  }
-
-  .header-container {
-    display: block;
-  }
-}
-
 .debate-link {
+  &.active {
+    > .navbar-menu-item {
+      background-color: $first-color;
+      color: $white !important;
+    }
+
+    .header-container {
+      display: block;
+    }
+  }
+
+  .menu-back-container {
+    height: 32px;
+    display: flex;
+    align-items: center;
+    border-top: solid 1px rgba(128, 128, 128, 0.2);
+    padding: 0 25px;
+
+    .menu-back-btn {
+      display: flex;
+      justify-content: center;
+      font-family: $font-family;
+
+      > .title {
+        margin-top: 3px;
+        margin-left: 5px;
+      }
+
+      > .assembl-icon::before {
+        font-size: 23px;
+      }
+    }
+  }
+
   .timeline-shifted {
     top: $navbar-height;
+  }
+
+  .debate-link-title {
+    .title-container {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .phase-title {
+      margin-top: -40px;
+      text-transform: initial;
+      font-size: 13px;
+      font-weight: bold;
+      font-family: $font-family4;
+      display: flex;
+      align-items: center;
+
+      & .assembl-icon {
+        line-height: normal;
+        margin-left: -6px;
+      }
+    }
   }
 
   .header-container {
@@ -21,6 +68,83 @@
     right: 0;
     left: 0;
     background-color: $first-color;
+
+    &.integreted {
+      position: relative;
+      background-color: $white;
+
+      .timeline-section {
+        padding: 0;
+
+        .timeline-container {
+          margin: 10px 30%;
+        }
+      }
+
+      .menu-container {
+        z-index: 1;
+        position: relative;
+        top: 0;
+        box-shadow: none;
+        padding: 0;
+        max-height: inherit;
+
+        .index-menu-item-container .index-item {
+          display: flex;
+          flex-direction: row;
+          font-size: 13px;
+          font-family: $font-family4;
+          padding: 15px;
+          border-top: solid 1px rgba(128, 128, 128, 0.2);
+          font-weight: bold;
+          align-items: flex-end;
+          justify-content: space-between;
+
+          &:hover {
+            color: $first-color;
+            font-family: $font-family3;
+          }
+
+          & .thumb-body {
+            padding-right: 5px;
+          }
+
+          & .thumb-arrow::before {
+            font-size: 10px;
+          }
+        }
+
+        .sub-index-1 {
+          padding-left: 45px;
+          padding-right: 25px;
+          height: 280px;
+        }
+
+        .sub-index-2 {
+          padding-left: 35px;
+        }
+
+        .sub-index {
+          background-color: #f1f1f1;
+          max-height: 280px;
+          overflow: auto;
+          transition: all 0.3s ease-out;
+
+          &.closed {
+            height: 0;
+          }
+
+          .index-item {
+            display: flex;
+            flex-direction: row;
+            font-size: 12px;
+            padding: 5px 10px;
+            border-top: none;
+            line-height: 1.7;
+          }
+        }
+      }
+    }
 
     .menu-container {
       position: fixed;
@@ -149,6 +273,18 @@
         height: auto;
         display: flex;
         position: relative;
+
+        &.vertical {
+          max-width: inherit;
+          max-height: 500px;
+          width: auto;
+          flex-direction: column;
+
+          &.timeline-menu-container {
+            margin: 0;
+            max-height: inherit;
+          }
+        }
       }
 
       .burger-menu {
@@ -236,7 +372,7 @@
         text-transform: uppercase;
         margin: 0;
         padding: 0;
-        font-family: "latoBold";
+        font-family: $font-family3;
       }
 
       .box-hyphen {

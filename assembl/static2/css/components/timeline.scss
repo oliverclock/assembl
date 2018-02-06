@@ -57,20 +57,37 @@
   .timeline-number {
     border: 2px solid $white;
     border-radius: 18px;
-    display: inline-block;
     color: $white;
-    font-size: $font-size-xxxs;
-    height: 18px;
+    font-size: $font-size-xs;
+    height: 22px;
     line-height: 14px;
-    padding: 0 0 0 1px;
+    padding: 4px 0 0 1px;
     position: relative;
     text-align: center;
-    width: 18px;
+    width: 22px;
     z-index: 2;
+    margin-left: -9px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    &.timeline-text {
+      padding-top: 0;
+
+      .thumb-arrow {
+        position: absolute;
+        right: 11px;
+        color: $first-color;
+
+        &::before {
+          font-size: 18px;
+        }
+      }
+    }
 
     .assembl-icon-checked {
       &:before {
-        font-size: $font-size-xxxs;
+        font-size: $font-size-xs;
       }
     }
   }
@@ -175,6 +192,77 @@
 
       .timeline-link {
         color: $first-color;
+      }
+    }
+  }
+}
+
+.timeline-container.vertical {
+  .minimized-timeline {
+    flex-basis: auto;
+    flex-direction: row-reverse;
+    justify-content: flex-end;
+    height: 65px;
+
+    .timeline-title {
+      margin-left: 25px;
+      padding-top: 5px;
+      display: flex;
+      flex-direction: column;
+      text-align: inherit;
+    }
+
+    .txt-active-light {
+      .timeline-link {
+        color: $first-color;
+        font-weight: bold;
+        height: auto;
+      }
+    }
+
+    .txt-active-bold {
+      .timeline-link {
+        color: $first-color;
+        height: auto;
+      }
+    }
+
+    .txt-not-active {
+      .timeline-link {
+        color: #ababab;
+        font-weight: bold;
+        height: auto;
+      }
+    }
+
+    .timeline-link-description {
+      font-size: 9px;
+      font-weight: bold;
+      font-family: $font-family7;
+      padding-top: 5px;
+      color: #ababab;
+      letter-spacing: 1px;
+    }
+
+    .timeline-graph {
+      margin-right: 0;
+      width: auto;
+
+      .timeline-bars {
+        display: flex;
+        height: calc(100% - 10px);
+        width: 100%;
+
+        .timeline-bar-background {
+          background-color: $gray-light;
+          width: 3px;
+          height: 100%;
+        }
+
+        .timeline-bar-filler {
+          background-color: $first-color-light-25;
+          width: 3px;
+        }
       }
     }
   }

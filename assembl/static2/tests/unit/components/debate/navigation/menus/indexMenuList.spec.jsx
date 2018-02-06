@@ -1,7 +1,7 @@
 import React from 'react';
 import ShallowRenderer from 'react-test-renderer/shallow';
 
-import MenuList from '../../../../../../js/app/components/debate/navigation/tables/menuList';
+import IndexMenuList from '../../../../../../js/app/components/debate/navigation/menus/indexMenuList';
 
 describe('MenuList component', () => {
   it('should match the MenuList', () => {
@@ -22,7 +22,7 @@ describe('MenuList component', () => {
       items: items
     };
     const renderer = new ShallowRenderer();
-    renderer.render(<MenuList {...props} />);
+    renderer.render(<IndexMenuList {...props} />);
     const rendered = renderer.getRenderOutput();
     expect(rendered).toMatchSnapshot();
   });

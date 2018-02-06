@@ -40,7 +40,7 @@ export default class BurgerNavbar extends React.PureComponent {
     return (
       <div className="burger-navbar">
         {shouldDisplayMenu && (
-          <div className="nav-burger-menu shown">
+          <div className="nav-burger-menu shown" id="navbar-burger">
             <NavigationMenu elements={elements} />
             <LanguageMenu size="xl" className="burgermenu-language center" />
           </div>

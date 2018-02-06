@@ -1,0 +1,105 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`DumbIndexMenuItem component should match a closed menu item 1`] = `
+<div
+  className="index-menu-item-container"
+>
+  <Link
+    className="index-item"
+    onlyActiveOnIndex={false}
+    style={Object {}}
+    to="/slug/debate/survey/theme/fooId"
+  >
+    <div
+      className="thumb-body"
+    >
+      <div
+        className="thumb-title"
+        title="Foo"
+      >
+        1. Foo
+      </div>
+    </div>
+    <span
+      className="thumb-arrow assembl-icon assembl-icon-down-open"
+      onClick={[Function]}
+    />
+  </Link>
+  <Connect(DumbIdeasIndex)
+    className="sub-index sub-index-1 closed"
+    identifier="survey"
+    items={
+      Array [
+        Object {
+          "id": "fooId",
+          "parentId": "rootId",
+          "title": "Foo",
+        },
+        Object {
+          "id": "barId",
+          "parentId": "fooId",
+          "title": "Bar",
+        },
+      ]
+    }
+    parents={
+      Array [
+        1,
+      ]
+    }
+    rootItem="fooId"
+  />
+</div>
+`;
+
+exports[`DumbIndexMenuItem component should match a selected menu item 1`] = `
+<div
+  className="index-menu-item-container"
+>
+  <Link
+    className="index-item"
+    onlyActiveOnIndex={false}
+    style={Object {}}
+    to="/slug/debate/survey/theme/fooId"
+  >
+    <div
+      className="thumb-body"
+    >
+      <div
+        className="thumb-title"
+        title="Foo"
+      >
+        1. Foo
+      </div>
+    </div>
+    <span
+      className="thumb-arrow assembl-icon assembl-icon-up-open"
+      onClick={[Function]}
+    />
+  </Link>
+  <Connect(DumbIdeasIndex)
+    className="sub-index sub-index-1"
+    identifier="survey"
+    items={
+      Array [
+        Object {
+          "id": "fooId",
+          "parentId": "rootId",
+          "title": "Foo",
+        },
+        Object {
+          "id": "barId",
+          "parentId": "fooId",
+          "title": "Bar",
+        },
+      ]
+    }
+    parents={
+      Array [
+        1,
+      ]
+    }
+    rootItem="fooId"
+  />
+</div>
+`;

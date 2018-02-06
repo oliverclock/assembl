@@ -1,0 +1,56 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`MenuList component should match the MenuList 1`] = `
+<div
+  className="debate-class"
+>
+  <Connect(DumbIndexMenuItem)
+    identifier="survey"
+    index={1}
+    item={
+      Object {
+        "id": "foo",
+        "parentId": "root",
+      }
+    }
+    items={
+      Array [
+        Object {
+          "id": "foo",
+          "parentId": "root",
+        },
+        Object {
+          "id": "bar",
+          "parentId": "root",
+        },
+      ]
+    }
+    onChange={[Function]}
+    selected={false}
+  />
+  <Connect(DumbIndexMenuItem)
+    identifier="survey"
+    index={2}
+    item={
+      Object {
+        "id": "bar",
+        "parentId": "root",
+      }
+    }
+    items={
+      Array [
+        Object {
+          "id": "foo",
+          "parentId": "root",
+        },
+        Object {
+          "id": "bar",
+          "parentId": "root",
+        },
+      ]
+    }
+    onChange={[Function]}
+    selected={false}
+  />
+</div>
+`;

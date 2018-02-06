@@ -1,7 +1,7 @@
 import React from 'react';
 import ShallowRenderer from 'react-test-renderer/shallow';
 
-import { DumbMenuItem } from '../../../../../js/app/components/debate/navigation/menuItem';
+import { DumbTableMenuItem } from '../../../../../../js/app/components/debate/navigation/menus/tableMenuItem';
 
 describe('DumbMenuItem component', () => {
   it('should match a selected menu item', () => {
@@ -21,7 +21,7 @@ describe('DumbMenuItem component', () => {
       slug: 'slug'
     };
     const renderer = new ShallowRenderer();
-    renderer.render(<DumbMenuItem {...props} />);
+    renderer.render(<DumbTableMenuItem {...props} />);
     const rendered = renderer.getRenderOutput();
     expect(rendered).toMatchSnapshot();
   });
@@ -43,7 +43,7 @@ describe('DumbMenuItem component', () => {
       slug: 'slug'
     };
     const renderer = new ShallowRenderer();
-    renderer.render(<DumbMenuItem {...props} />);
+    renderer.render(<DumbTableMenuItem {...props} />);
     const rendered = renderer.getRenderOutput();
     expect(rendered).toMatchSnapshot();
   });

@@ -273,11 +273,15 @@ const Translations = {
       notStarted: "La phase %{phaseName} n'a pas encore commencé. Merci de revenir à partir du ",
       isCompleted: "Cette phase est terminée. Vous ne pouvez plus voter.",
       noAnswer: "Cette phase est terminée. Vous ne pouvez plus répondre.",
+      phaseStarted: "Phase en cours",
+      phaseCompleted: "Phase terminée",
+      phaseUpcoming: "Phase à venir",
       edit: {
         title: "Je modifie mon message",
         subject: "Titre",
         body: "Message"
-      }
+      },
+      menuBack: "Retour"
     },
     profile: {
       panelTitle: "Votre compte",
@@ -723,11 +727,15 @@ const Translations = {
       notStarted: "The %{phaseName} phase has not started. Please come back from ",
       isCompleted: "This phase is closed. You can no longer vote.",
       noAnswer: "This phase is closed. You can no longer answer.",
+      phaseStarted: "Current phase",
+      phaseCompleted: "Closed phase",
+      phaseUpcoming: "Upcoming phase",
       edit: {
         title: "I edit my message",
         subject: "Subject",
         body: "Comment"
-      }
+      },
+      menuBack: "Back"
     },
     profile: {
       panelTitle: "Your account",

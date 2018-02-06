@@ -1,0 +1,43 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`IdeasMenu component should match the IndexMenu 1`] = `
+<MenuList
+  identifier="multiColumns"
+  items={
+    Array [
+      Object {
+        "id": "foo",
+        "parentId": "root",
+      },
+      Object {
+        "id": "bar",
+        "parentId": "root",
+      },
+    ]
+  }
+  kind="index"
+  onMenuItemClick={undefined}
+  rootItem="root"
+/>
+`;
+
+exports[`IdeasMenu component should match the TableMenu 1`] = `
+<MenuList
+  identifier="multiColumns"
+  items={
+    Array [
+      Object {
+        "id": "foo",
+        "parentId": "root",
+      },
+      Object {
+        "id": "bar",
+        "parentId": "root",
+      },
+    ]
+  }
+  kind={undefined}
+  onMenuItemClick={undefined}
+  rootItem="root"
+/>
+`;

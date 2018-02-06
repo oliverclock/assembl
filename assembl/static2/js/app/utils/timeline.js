@@ -2,7 +2,7 @@
 
 import { isDateExpired, getNumberOfDays, calculatePercentage } from './globalFunctions';
 
-type Phase = {
+export type Phase = {
   identifier: string,
   interface_v1: boolean,
   start: string,

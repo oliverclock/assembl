@@ -7,6 +7,7 @@ import { Navbar } from 'react-bootstrap';
 import { compose, graphql } from 'react-apollo';
 import { I18n, Translate } from 'react-redux-i18n';
 import bind from 'lodash/bind';
+import classNames from 'classnames';
 
 import { getCurrentPhaseIdentifier, isSeveralIdentifiers, getPhaseName } from '../../utils/timeline';
 import { get } from '../../utils/routeMap';
@@ -72,6 +73,7 @@ const SectionLink = ({ section, options }) => {
       className="navbar-menu-item pointer"
       activeClassName="active"
       dataText={title}
+      screenTooSmall={options.screenTooSmall}
     >
       {title}
     </DebateLink>
@@ -123,7 +125,8 @@ type MapSectionOptions = {
   phase: string,
   phaseContext: string,
   displayDebateModal: () => mixed,
-  slug: string
+  slug: string,
+  screenTooSmall: boolean
 };
 
 type Section = {
@@ -173,7 +176,8 @@ export class AssemblNavbar extends React.PureComponent {
       slug: slug,
       phase: getCurrentPhaseIdentifier(timeline),
       phaseContext: phaseContext(timeline, phase),
-      displayDebateModal: createDisplayModal({ debate: debate, i18n: i18n })
+      displayDebateModal: createDisplayModal({ debate: debate, i18n: i18n }),
+      screenTooSmall: screenTooSmall
     };
     const commonProps = {
       elements: filteredSections.map(bind(mapSectionToElement, null, bind.placeholder, mapOptions)),
@@ -186,7 +190,7 @@ export class AssemblNavbar extends React.PureComponent {
     return (
       <div className="background-light">
         <Navbar fixedTop fluid>
-          <div className="nav-bar max-container" id="navbar">
+          <div className={classNames('nav-bar max-container', { small: screenTooSmall })} id="navbar">
             {screenTooSmall && <BurgerNavbar {...commonProps} />}
             <FlatNavbar
               {...commonProps}

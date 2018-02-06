@@ -7,7 +7,7 @@ exports[`MenuList component should match the MenuList 1`] = `
   <div
     className="menu-table"
   >
-    <Connect(DumbMenuItem)
+    <Connect(DumbTableMenuItem)
       hasSubItems={false}
       identifier="survey"
       item={
@@ -20,7 +20,7 @@ exports[`MenuList component should match the MenuList 1`] = `
       onMouseOver={[Function]}
       selected={false}
     />
-    <Connect(DumbMenuItem)
+    <Connect(DumbTableMenuItem)
       hasSubItems={false}
       identifier="survey"
       item={

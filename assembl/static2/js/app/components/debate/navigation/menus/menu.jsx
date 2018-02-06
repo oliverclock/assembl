@@ -2,9 +2,9 @@
 import React from 'react';
 import type { ApolloClient } from 'react-apollo';
 
-import { SurveyTable, IdeasTable } from './tables';
-import AllIdeasQuery from '../../../graphql/AllIdeasQuery.graphql';
-import DebateThematicsQuery from '../../../graphql/DebateThematicsQuery.graphql';
+import { SurveyMenu, IdeasMenu } from '.';
+import AllIdeasQuery from '../../../../graphql/AllIdeasQuery.graphql';
+import DebateThematicsQuery from '../../../../graphql/DebateThematicsQuery.graphql';
 
 const queries = {
   survey: DebateThematicsQuery,
@@ -23,13 +23,13 @@ type MenuTableProps = {
   identifier: string
 };
 
-function MenuTable(props: MenuTableProps) {
+function Menu(props: MenuTableProps) {
   switch (props.identifier) {
   case 'survey':
-    return <SurveyTable {...props} />;
+    return <SurveyMenu {...props} />;
   default:
-    return <IdeasTable {...props} />;
+    return <IdeasMenu {...props} />;
   }
 }
 
-export default MenuTable;
+export default Menu;

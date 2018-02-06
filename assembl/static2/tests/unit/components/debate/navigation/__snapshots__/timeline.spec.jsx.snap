@@ -11,7 +11,9 @@ exports[`DumbTimeline component should match the DumbTimeline 1`] = `
     index={0}
     isCurrentPhase={false}
     isStepCompleted={false}
+    onHideMenu={undefined}
     onMenuItemClick={undefined}
+    onShowMenu={undefined}
     phaseIdentifier="foo"
     showNavigation={true}
     startDate="date1"
@@ -24,6 +26,7 @@ exports[`DumbTimeline component should match the DumbTimeline 1`] = `
         ],
       }
     }
+    vertical={undefined}
   />
   <Connect(withApollo(DumbTimelineSegment))
     barPercent={0}
@@ -32,7 +35,9 @@ exports[`DumbTimeline component should match the DumbTimeline 1`] = `
     index={1}
     isCurrentPhase={false}
     isStepCompleted={false}
+    onHideMenu={undefined}
     onMenuItemClick={undefined}
+    onShowMenu={undefined}
     phaseIdentifier="bar"
     showNavigation={true}
     startDate="date1Bar"
@@ -45,6 +50,7 @@ exports[`DumbTimeline component should match the DumbTimeline 1`] = `
         ],
       }
     }
+    vertical={undefined}
   />
 </div>
 `;
