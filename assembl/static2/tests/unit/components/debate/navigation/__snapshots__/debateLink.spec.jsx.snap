@@ -14,34 +14,23 @@ exports[`DebateLink component should match the DebateLink 1`] = `
     style={Object {}}
     to="https://foo.bar"
   >
-    <span
-      className={undefined}
-    >
+    <span>
       <span>
         Debate
       </span>
     </span>
   </Link>
-  <div
-    className="header-container"
-  >
-    <section
-      className="timeline-section"
-      id="timeline"
-    >
-      <div
-        className="max-container"
-      >
-        <Connect(DumbTimeline)
-          identifier="survey"
-          onMenuClosed={undefined}
-          onMenuItemClick={[Function]}
-          onMenuShown={undefined}
-          showNavigation={true}
-          vertical={undefined}
-        />
-      </div>
-    </section>
-  </div>
+  <TimelineContainer
+    active={false}
+    identifier="survey"
+    onClose={[Function]}
+    onMenuItemClick={[Function]}
+    small={undefined}
+    title={
+      <span>
+        Debate
+      </span>
+    }
+  />
 </div>
 `;

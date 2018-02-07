@@ -5,7 +5,7 @@
       color: $white !important;
     }
 
-    .header-container {
+    .timeline-menu-container {
       display: block;
     }
   }
@@ -14,7 +14,6 @@
     height: 32px;
     display: flex;
     align-items: center;
-    border-top: solid 1px rgba(128, 128, 128, 0.2);
     padding: 0 25px;
 
     .menu-back-btn {
@@ -37,44 +36,29 @@
     top: $navbar-height;
   }
 
-  .debate-link-title {
-    .title-container {
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-    }
-
-    .phase-title {
-      margin-top: -40px;
-      text-transform: initial;
-      font-size: 13px;
-      font-weight: bold;
-      font-family: $font-family4;
-      display: flex;
-      align-items: center;
-
-      & .assembl-icon {
-        line-height: normal;
-        margin-left: -6px;
-      }
-    }
-  }
-
-  .header-container {
+  .timeline-menu-container {
     display: none;
     position: absolute;
     width: 100%;
     right: 0;
     left: 0;
+    z-index: 56;
     background-color: $first-color;
 
-    &.integreted {
-      position: relative;
+    &.small {
+      display: block;
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      right: 0;
+      width: 100%;
+      z-index: 51;
+      border-top: solid 1px rgba(128, 128, 128, 0.2);
       background-color: $white;
 
       .timeline-section {
         padding: 0;
+        height: 100%;
 
         .timeline-container {
           margin: 10px 30%;
@@ -252,6 +236,7 @@
 
     .max-container {
       position: relative;
+      height: 100%;
     }
 
     .not-started {
@@ -267,6 +252,19 @@
       width: 100%;
       z-index: 200;
 
+      & .timeline-menu {
+        margin: 0;
+        max-height: inherit;
+        width: 100%;
+        height: 100%;
+        top: -11px;
+        right: 0;
+        left: 0;
+        background-color: #fff;
+        position: absolute;
+        z-index: 56;
+      }
+
       .timeline-container {
         margin: 0 100px;
         max-width: 500px;
@@ -279,11 +277,6 @@
           max-height: 500px;
           width: auto;
           flex-direction: column;
-
-          &.timeline-menu-container {
-            margin: 0;
-            max-height: inherit;
-          }
         }
       }
 

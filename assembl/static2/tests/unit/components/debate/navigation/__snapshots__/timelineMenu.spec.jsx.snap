@@ -1,0 +1,25 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`TimelineMenu component should match the TimelineMenu 1`] = `
+<div
+  className="menu-container"
+>
+  <Menu
+    identifier="foo"
+    kind="table"
+    onMenuItemClick={undefined}
+  />
+</div>
+`;
+
+exports[`TimelineMenu component should match the vetical TimelineMenu 1`] = `
+<div
+  className="menu-container"
+>
+  <Menu
+    identifier="foo"
+    kind="index"
+    onMenuItemClick={undefined}
+  />
+</div>
+`;

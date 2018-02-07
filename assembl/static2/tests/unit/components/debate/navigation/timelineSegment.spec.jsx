@@ -19,14 +19,17 @@ describe('DumbTimeline component', () => {
         title: { entries: [{ en: 'Bar' }] }
       }
     ];
-    const props = {
-      client: { query: () => {} },
+    const phase = {
       title: {
         entries: [{ en: 'Foo' }]
       },
-      startDate: 'date1',
-      endDate: 'date2',
-      phaseIdentifier: 'foo',
+      start: 'date1',
+      end: 'date2',
+      identifier: 'foo'
+    };
+    const props = {
+      phase: phase,
+      client: { query: () => {} },
       barPercent: 20,
       locale: 'en',
       debate: {

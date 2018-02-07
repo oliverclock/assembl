@@ -2,55 +2,65 @@
 
 exports[`DumbTimeline component should match the DumbTimeline 1`] = `
 <div
-  className="timeline-container"
+  className="timeline-panel"
 >
-  <Connect(withApollo(DumbTimelineSegment))
-    barPercent={0}
-    endDate="date2"
-    identifier="survey"
-    index={0}
-    isCurrentPhase={false}
-    isStepCompleted={false}
-    onHideMenu={undefined}
-    onMenuItemClick={undefined}
-    onShowMenu={undefined}
-    phaseIdentifier="foo"
-    showNavigation={true}
-    startDate="date1"
-    title={
-      Object {
-        "entries": Array [
+  <div
+    className="timeline-body"
+  >
+    <div
+      className="timeline-container"
+    >
+      <Connect(withApollo(DumbTimelineSegment))
+        barPercent={0}
+        identifier="survey"
+        index={0}
+        isCurrentPhase={false}
+        isStepCompleted={false}
+        onHideMenu={undefined}
+        onMenuItemClick={undefined}
+        onShowMenu={undefined}
+        phase={
           Object {
-            "en": "Foo",
-          },
-        ],
-      }
-    }
-    vertical={undefined}
-  />
-  <Connect(withApollo(DumbTimelineSegment))
-    barPercent={0}
-    endDate="date2Bar"
-    identifier="survey"
-    index={1}
-    isCurrentPhase={false}
-    isStepCompleted={false}
-    onHideMenu={undefined}
-    onMenuItemClick={undefined}
-    onShowMenu={undefined}
-    phaseIdentifier="bar"
-    showNavigation={true}
-    startDate="date1Bar"
-    title={
-      Object {
-        "entries": Array [
+            "end": "date2",
+            "identifier": "foo",
+            "start": "date1",
+            "title": Object {
+              "entries": Array [
+                Object {
+                  "en": "Foo",
+                },
+              ],
+            },
+          }
+        }
+        vertical={undefined}
+      />
+      <Connect(withApollo(DumbTimelineSegment))
+        barPercent={0}
+        identifier="survey"
+        index={1}
+        isCurrentPhase={false}
+        isStepCompleted={false}
+        onHideMenu={undefined}
+        onMenuItemClick={undefined}
+        onShowMenu={undefined}
+        phase={
           Object {
-            "en": "Bar",
-          },
-        ],
-      }
-    }
-    vertical={undefined}
-  />
+            "end": "date2Bar",
+            "identifier": "bar",
+            "start": "date1Bar",
+            "title": Object {
+              "entries": Array [
+                Object {
+                  "en": "Bar",
+                },
+              ],
+            },
+          }
+        }
+        vertical={undefined}
+      />
+    </div>
+  </div>
 </div>
 `;

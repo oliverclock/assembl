@@ -10,6 +10,7 @@ export const NB_IDEA_PREVIEW_TO_SHOW = 4;
 export const APP_CONTAINER_PADDING = 15;
 export const MIN_WIDTH_COLUMN = 400;
 export const COLUMN_OPACITY_GAIN = 0.5;
+export const ANIMATION_DURATION = 200;
 
 export const APOLLO_NETWORK_STATUS = {
   /**

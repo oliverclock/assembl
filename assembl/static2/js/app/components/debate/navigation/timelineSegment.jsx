@@ -6,12 +6,12 @@ import { Translate, Localize, I18n } from 'react-redux-i18n';
 import { connect } from 'react-redux';
 import classNames from 'classnames';
 
-import Menu, { prefetchMenuQuery } from './menus/menu';
-import { getPhaseStatus, isSeveralIdentifiers, type Timeline } from '../../../utils/timeline';
+import { prefetchMenuQuery } from './menus/menu';
+import { getPhaseStatus, isSeveralIdentifiers, type Timeline, type Phase } from '../../../utils/timeline';
 import { displayModal } from '../../../utils/utilityManager';
 import { get } from '../../../utils/routeMap';
 import { PHASE_STATUS } from '../../../constants';
-import { MENU_KINDS } from './menus';
+import TimelineMenu from './timelineMenu';
 
 export type DebateType = {
   debateData: {
@@ -23,12 +23,7 @@ export type DebateType = {
 type TimelineSegmentProps = {
   index: number,
   client: ApolloClient,
-  title: {
-    entries: Array<*>
-  },
-  startDate: string,
-  endDate: string,
-  phaseIdentifier: string,
+  phase: Phase,
   debate: DebateType,
   barPercent: number,
   isCurrentPhase: boolean,
@@ -50,8 +45,8 @@ export class DumbTimelineSegment extends React.Component<*, TimelineSegmentProps
   };
 
   componentWillMount() {
-    const { phaseIdentifier, title, startDate, endDate, locale, client } = this.props;
-    this.phaseStatus = getPhaseStatus(startDate, endDate);
+    const { phase: { identifier, title, start, end }, locale, client } = this.props;
+    this.phaseStatus = getPhaseStatus(start, end);
     let phaseName = '';
     let phaseTitle = '';
     title.entries.forEach((entry) => {
@@ -64,7 +59,7 @@ export class DumbTimelineSegment extends React.Component<*, TimelineSegmentProps
     this.phaseTitle = phaseTitle;
     prefetchMenuQuery(client, {
       lang: locale,
-      identifier: phaseIdentifier
+      identifier: identifier
     });
   }
 
@@ -80,12 +75,11 @@ export class DumbTimelineSegment extends React.Component<*, TimelineSegmentProps
 
   phaseTitle = null;
 
-  showMenu = (event: SyntheticMouseEvent<>) => {
+  showMenu = () => {
     this.setState({ active: true }, () => {
-      const { onShowMenu, phaseIdentifier } = this.props;
-      if (onShowMenu) onShowMenu({ id: phaseIdentifier, title: this.phaseTitle });
+      const { onShowMenu, phase } = this.props;
+      if (onShowMenu) onShowMenu(phase);
     });
-    if (this.props.vertical && event) event.preventDefault();
   };
 
   hideMenu = () => {
@@ -95,27 +89,22 @@ export class DumbTimelineSegment extends React.Component<*, TimelineSegmentProps
     });
   };
 
-  close = () => {
-    this.setState({ active: false });
-  };
-
   renderNotStarted = (className?: string) => {
-    const { startDate } = this.props;
+    const { phase: { start } } = this.props;
     return (
       <div className={className}>
         <Translate value="debate.notStarted" phaseName={this.phaseName} />
-        <Localize value={startDate} dateFormat="date.format" />
+        <Localize value={start} dateFormat="date.format" />
       </div>
     );
   };
 
   displayPhase = () => {
-    const { phaseIdentifier } = this.props;
+    const { phase } = this.props;
     const { debateData } = this.props.debate;
-    const phase = debateData.timeline.filter(p => p.identifier === phaseIdentifier);
-    const isRedirectionToV1 = phase[0].interface_v1;
+    const isRedirectionToV1 = phase.interface_v1;
     const slug = { slug: debateData.slug };
-    const params = { slug: debateData.slug, phase: phaseIdentifier };
+    const params = { slug: debateData.slug, phase: phase.identifier };
     const isSeveralPhases = isSeveralIdentifiers(debateData.timeline);
     if (isSeveralPhases) {
       if (this.phaseStatus === PHASE_STATUS.notStarted) {
@@ -143,28 +132,8 @@ export class DumbTimelineSegment extends React.Component<*, TimelineSegmentProps
     }
   };
 
-  renderMenu = () => {
-    const { phaseIdentifier, onMenuItemClick, vertical } = this.props;
-    const { active } = this.state;
-    const isNotStarted = this.phaseStatus === PHASE_STATUS.notStarted;
-    if (!active) return null;
-    return (
-      <div className="menu-container">
-        {isNotStarted ? (
-          this.renderNotStarted('not-started')
-        ) : (
-          <Menu
-            identifier={phaseIdentifier}
-            onMenuItemClick={onMenuItemClick}
-            kind={vertical ? MENU_KINDS.index : MENU_KINDS.table}
-          />
-        )}
-      </div>
-    );
-  };
-
   render() {
-    const { index, barPercent, isCurrentPhase, isStepCompleted, vertical } = this.props;
+    const { index, phase, onMenuItemClick, barPercent, isCurrentPhase, isStepCompleted, vertical } = this.props;
     const { active } = this.state;
     const timelineClass = classNames('timeline-title', {
       'txt-active-bold': vertical && isCurrentPhase,
@@ -173,17 +142,15 @@ export class DumbTimelineSegment extends React.Component<*, TimelineSegmentProps
     });
     const complitedOrCurrent = isStepCompleted || isCurrentPhase;
     const dimensionName = vertical ? 'height' : 'width';
-    if (vertical && active) return this.renderMenu();
     return (
       <div
         className={classNames('minimized-timeline', {
-          active: active
+          active: !vertical && active
         })}
         onMouseOver={!vertical && this.showMenu}
         onMouseLeave={!vertical && this.hideMenu}
-        onClick={vertical && this.showMenu}
       >
-        <div onClick={this.displayPhase} className={timelineClass}>
+        <div onClick={vertical ? this.showMenu : this.displayPhase} className={timelineClass}>
           <div className="timeline-link">{this.phaseTitle}</div>
           {vertical && (
             <div className="timeline-link-description">
@@ -224,8 +191,13 @@ export class DumbTimelineSegment extends React.Component<*, TimelineSegmentProps
             <div className="timeline-bar-background">&nbsp;</div>
           </div>
         </div>
-        {!vertical && active && <span className="timeline-arrow" />}
-        {this.renderMenu()}
+        {!vertical &&
+          active && (
+            <div>
+              <span className="timeline-arrow" />
+              <TimelineMenu phase={phase} onMenuItemClick={onMenuItemClick} />
+            </div>
+          )}
       </div>
     );
   }
@@ -237,4 +209,4 @@ const mapStateToProps = state => ({
 });
 
 // $FlowFixMe
-export default connect(mapStateToProps, null, null, { withRef: true })(withApollo(DumbTimelineSegment, { withRef: true }));
+export default connect(mapStateToProps)(withApollo(DumbTimelineSegment));

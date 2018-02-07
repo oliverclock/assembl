@@ -267,3 +267,46 @@
     }
   }
 }
+
+.timeline-panel {
+  height: 100%;
+
+  .timeline-header {
+    .title-container {
+      font-family: $font-family4;
+      font-size: 14px;
+      letter-spacing: .8px;
+      padding: 0 20px;
+      text-transform: uppercase;
+      white-space: nowrap;
+      background-color: $first-color-light;
+      font-weight: bold;
+      color: $first-color;
+      display: flex;
+      line-height: 50px;
+      align-items: center;
+      flex-direction: column;
+      justify-content: center;
+
+      .phase-title {
+        margin-top: -28px;
+        text-transform: initial;
+        font-size: 13px;
+        font-weight: bold;
+        font-family: $font-family4;
+        display: flex;
+        align-items: center;
+
+        & .assembl-icon {
+          line-height: normal;
+          margin-left: -1px;
+        }
+      }
+    }
+  }
+
+  .timeline-body {
+    position: relative;
+    height: 100%;
+  }
+}

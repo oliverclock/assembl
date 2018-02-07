@@ -2,9 +2,9 @@
 import React from 'react';
 import { Link } from 'react-router';
 import classNames from 'classnames';
-import { I18n } from 'react-redux-i18n';
 
-import Timeline, { type PhaseData } from './timeline';
+import Timeline from './timeline';
+import Slide from '../../common/transitions/slide';
 
 type DebateLinkProps = {
   identifier: string,
@@ -17,17 +17,38 @@ type DebateLinkProps = {
 };
 
 type DebateLinkState = {
-  timelineActive: boolean,
-  activePhaseMenu: PhaseData
+  timelineActive: boolean
 };
+
+function DivContainer({ children, className }) {
+  return <div className={className}>{children}</div>;
+}
+
+function SlideContainer({ children, className, active }) {
+  return (
+    <Slide in={active} className={className}>
+      {children}
+    </Slide>
+  );
+}
+
+function TimelineContainer({ title, identifier, small, active, onMenuItemClick, onClose }) {
+  const Container = small ? SlideContainer : DivContainer;
+  return (
+    <Container active={active} className={classNames('timeline-menu-container', { small: small })}>
+      <section className={classNames('timeline-section', { vertical: small })} id="timeline">
+        <div className="max-container">
+          <Timeline title={title} vertical={small} identifier={identifier} onMenuItemClick={onMenuItemClick} onClose={onClose} />
+        </div>
+      </section>
+    </Container>
+  );
+}
 
 class DebateLink extends React.Component<*, DebateLinkProps, DebateLinkState> {
   state = {
-    timelineActive: false,
-    activePhaseMenu: { id: '', title: '' }
+    timelineActive: false
   };
-
-  timeline = null;
 
   showTimeline = (event: SyntheticMouseEvent<>) => {
     this.setState({ timelineActive: true });
@@ -38,78 +59,32 @@ class DebateLink extends React.Component<*, DebateLinkProps, DebateLinkState> {
     this.setState({ timelineActive: false });
   };
 
-  onMenuShown = (phase: PhaseData) => {
-    this.setState({ activePhaseMenu: phase });
-  };
-
-  onMenuClosed = () => {
-    this.setState({ activePhaseMenu: { id: '', title: '' } });
-  };
-
-  closeMenu = () => {
-    const { activePhaseMenu } = this.state;
-    const menuActive = !!activePhaseMenu.id;
-    this.setState({ timelineActive: menuActive, activePhaseMenu: { id: '', title: '' } }, () => {
-      if (menuActive && this.timeline) this.timeline.getWrappedInstance().closeMenu();
-    });
-  };
-
   render() {
     const { identifier, children, to, className, activeClassName, dataText, screenTooSmall } = this.props;
-    const { timelineActive, activePhaseMenu } = this.state;
-    const currentPhaseTitle = activePhaseMenu.title;
+    const { timelineActive } = this.state;
     return (
       <div
         className={classNames('debate-link', { active: timelineActive })}
         onMouseOver={!screenTooSmall && this.showTimeline}
         onMouseLeave={!screenTooSmall && this.hideTimeline}
       >
-        {screenTooSmall && (
-          <div className="menu-back-container">
-            {timelineActive && (
-              <div onClick={this.closeMenu} className="menu-back-btn">
-                <span className="assembl-icon assembl-icon-left-small" />
-                <span className="title">{I18n.t('debate.menuBack')}</span>
-              </div>
-            )}
-          </div>
-        )}
         <Link
           to={to}
           className={classNames('debate-link-title', className, { selected: timelineActive })}
           activeClassName={activeClassName}
           data-text={dataText}
         >
-          <span className={screenTooSmall && 'title-container'}>
-            {children}
-            {screenTooSmall &&
-              currentPhaseTitle && (
-                <span className="phase-title">
-                  <span className="assembl-icon assembl-icon-right-dir" />
-                  <span>{currentPhaseTitle}</span>
-                </span>
-              )}
-          </span>
-          {screenTooSmall &&
-            !timelineActive && <span onClick={this.showTimeline} className="thumb-arrow assembl-icon assembl-icon-right-dir" />}
+          <span>{children}</span>
+          {screenTooSmall && <span onClick={this.showTimeline} className="thumb-arrow assembl-icon assembl-icon-right-dir" />}
         </Link>
-        <div className={classNames('header-container', { integreted: screenTooSmall })}>
-          <section className={classNames('timeline-section', { vertical: screenTooSmall })} id="timeline">
-            <div className="max-container">
-              <Timeline
-                ref={(timeline) => {
-                  this.timeline = timeline;
-                }}
-                vertical={screenTooSmall}
-                showNavigation
-                identifier={identifier}
-                onMenuItemClick={this.hideTimeline}
-                onMenuShown={screenTooSmall && this.onMenuShown}
-                onMenuClosed={screenTooSmall && this.onMenuClosed}
-              />
-            </div>
-          </section>
-        </div>
+        <TimelineContainer
+          title={children}
+          identifier={identifier}
+          small={screenTooSmall}
+          active={timelineActive}
+          onMenuItemClick={this.hideTimeline}
+          onClose={this.hideTimeline}
+        />
       </div>
     );
   }
