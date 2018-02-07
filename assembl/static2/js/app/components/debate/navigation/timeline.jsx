@@ -21,7 +21,7 @@ type TimelineProps = {
 
 type TimelineState = {
   menuItemOpen: boolean,
-  selectedPhase: ?Phase
+  selectedPhase: Phase | null
 };
 
 function TimeLineHeader({ title, currentPhase, onBack, locale }) {
