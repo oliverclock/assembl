@@ -24,6 +24,7 @@ from fabric.api import (
     abort, cd, env, execute, hide, prefix, settings, task as fab_task)
 from fabric.colors import yellow, cyan, red, green
 
+
 # import logging
 # import paramiko
 
@@ -181,6 +182,50 @@ def update_vendor_config():
         from os import system
         # Run locally
         system("cd %s ; git pull" % config_file_dir)
+
+
+@task
+def docker_fabric_task():
+    """
+    To be launched with fab -c configs/bluenove-server-configs/dev_staging.rc docker_fabric_task
+    """
+#     #env.docker_api_version = '1.17.05'
+    env.docker_tunnel_remote_port = 22024
+    from dockerfabric import cli
+    from dockerfabric.utils.files import temp_dir
+    print "testing the container name environnement variable"
+    if env.docker_piwik:
+        with temp_dir() as remote_tmp:
+            print remote_tmp
+            try:
+                run("git clone git@github.com:siutin/piwik-docker-compose.git")
+                run("cd piwik-docker-compose && docker-compose up -d")
+                run("docker exec -d piwikdockercompose_db_1 mysqldump --result-file=dump.sql")
+            except:
+                run("cd piwik-docker-compose && docker-compose up -d")
+                run("docker exec -d piwikdockercompose_db_1 mysqldump --result-file=dump.sql")
+        cli.copy_resource(u"piwikdockercompose_db_1", '/dump.sql', '/Users/mozayed/Pictures/dump.sql')
+    else:
+        get('/etc/nginx/sites-available', '/Users/mozayed/Pictures/dump.sql')
+
+    def copy_resource_from_localhost_to_remote_container(resource, container, temp, dest_file_name):
+        """
+        :param resource: the file on your local machine you want to transfer
+        :type resource: unicode
+        :param container: the remote container you want to transfer to
+        :type container: unicode
+        :param temp: temporarily created file on remote host
+        :type temp: unicode
+        :param dest_file_name: the path to file on remote container
+        :type dest_file_name:  unicode
+        """
+        put(resource, temp)
+        with temp_dir() as remote_tmp:
+            print remote_tmp
+            run("docker cp {0} {1}:{2}".format(temp, container, dest_file_name), shell=False)
+            run("rm {0}".format(temp))
+        # copy_resource_from_localhost_to_remote_container('/Users/mozayed/Pictures/bimbim/source_testing_file',
+        #                                                     'modest_pike', '/home/assembl_user/', '/var/')
 
 
 @task
@@ -1626,6 +1671,18 @@ def as_rc(ini_filename):
                 k = "__".join((section, k))
             r[k] = v
     return r
+
+
+@task
+def backup_piwik_data():
+    from jinja2 import Environment, FileSystemLoader
+
+    jenv = Environment(
+        loader=FileSystemLoader('borg'),
+        autoescape=lambda t: False)
+    template = jenv.get_template('assembl_borg_backup.sh.jinja2')
+    with open('borg/backup_piwik_output.rc', 'w') as f:
+        f.write(template.render(assembl_path="borg/", repository="borg/borg_repository/"))
 
 
 @task
