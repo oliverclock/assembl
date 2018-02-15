@@ -24,7 +24,6 @@ from fabric.api import (
     abort, cd, env, execute, hide, prefix, settings, task as fab_task)
 from fabric.colors import yellow, cyan, red, green
 
-
 # import logging
 # import paramiko
 
@@ -189,11 +188,11 @@ def docker_fabric_task():
     """
     To be launched with fab -c configs/bluenove-server-configs/dev_staging.rc docker_fabric_task
     """
-#     #env.docker_api_version = '1.17.05'
+    # env.docker_api_version = '1.17.05'
     env.docker_tunnel_remote_port = 22024
     from dockerfabric import cli
     from dockerfabric.utils.files import temp_dir
-    print "testing the container name environnement variable"
+    cwd = os.getcwd()
     if env.docker_piwik:
         with temp_dir() as remote_tmp:
             print remote_tmp
@@ -204,9 +203,9 @@ def docker_fabric_task():
             except:
                 run("cd piwik-docker-compose && docker-compose up -d")
                 run("docker exec -d piwikdockercompose_db_1 mysqldump --result-file=dump.sql")
-        cli.copy_resource(u"piwikdockercompose_db_1", '/dump.sql', '/Users/mozayed/Pictures/dump.sql')
+        cli.copy_resource(u"piwikdockercompose_db_1", '/dump.sql', cwd + "/dump.sql")
     else:
-        get('/etc/nginx/sites-available', '/Users/mozayed/Pictures/dump.sql')
+        get('/etc/nginx/sites-available', cwd)
 
     def copy_resource_from_localhost_to_remote_container(resource, container, temp, dest_file_name):
         """
@@ -1676,13 +1675,18 @@ def as_rc(ini_filename):
 @task
 def backup_piwik_data():
     from jinja2 import Environment, FileSystemLoader
-
+    from fabric.api import local
+    import os
+    cwd = os.getcwd()
+    if not os.path.exists("borg"):
+        os.mkdir("borg")
+    local("cp assembl_borg_backup.sh.jinja2 borg/")
     jenv = Environment(
         loader=FileSystemLoader('borg'),
         autoescape=lambda t: False)
     template = jenv.get_template('assembl_borg_backup.sh.jinja2')
     with open('borg/backup_piwik_output.rc', 'w') as f:
-        f.write(template.render(assembl_path="borg/", repository="borg/borg_repository/"))
+        f.write(template.render(assembl_path=cwd, repository="borg/borg_repository/", borg_passphrase="passphrase"))
 
 
 @task
