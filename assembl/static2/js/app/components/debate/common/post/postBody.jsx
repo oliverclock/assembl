@@ -24,6 +24,7 @@ export type Extract = {
 
 type Props = {
   body: string,
+  dbId: number,
   extracts: Array<Extract>,
   bodyDivRef: ?Function,
   bodyMimeType: string,
@@ -49,7 +50,7 @@ const postBodyReplacementComponents = {
 };
 
 const Html = (props) => {
-  const { extracts, rawHtml, divRef, replacementComponents } = props; // eslint-disable-line
+  const { extracts, rawHtml, divRef, dbId, replacementComponents } = props;
   /*
    * The activeHtml() function will parse the raw html,
    * replace specified tags with provided components
@@ -61,6 +62,8 @@ const Html = (props) => {
   delete containerProps.rawHtml;
   delete containerProps.divRef;
   delete containerProps.replacementComponents;
+  delete containerProps.extracts;
+  delete containerProps.dbId;
   return (
     <div ref={divRef} {...containerProps}>
       {nodes}
@@ -75,6 +78,7 @@ const PostBody = ({
   bodyMimeType,
   contentLocale,
   id,
+  dbId,
   lang,
   subject,
   originalLocale,
@@ -92,6 +96,7 @@ const PostBody = ({
         className={`body ${bodyMimeType === 'text/plain' ? 'pre-wrap' : ''}`}
         divRef={bodyDivRef}
         extracts={extracts}
+        dbId={dbId}
         replacementComponents={postBodyReplacementComponents}
       />
     )}
