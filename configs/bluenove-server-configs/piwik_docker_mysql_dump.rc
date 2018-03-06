@@ -1,0 +1,7 @@
+_extends = base_env.rc 
+public_hostname = culturemanager.assembl.org
+assembl_user=mozayed
+_projectpath = /Users/mozayed/Assembl
+mysql_password=wwitri2Dzhishme
+docker_piwik =
+mysql_user=root

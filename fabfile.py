@@ -184,32 +184,6 @@ def update_vendor_config():
 
 
 @task
-def docker_piwik_database_backup():
-    """
-    To be launched with fab -c configs/bluenove-server-configs/dev_staging.rc docker_piwik_database_backup
-    """
-    # env.docker_api_version = '1.17.05'
-    env.docker_tunnel_remote_port = 22024
-    from dockerfabric import cli
-    from dockerfabric.utils.files import temp_dir
-    cwd = os.getcwd()
-    if env.docker_piwik:
-        with temp_dir() as remote_tmp:
-            print remote_tmp
-            from fabric.contrib import files
-            if files.exists("/home/assembl_user/piwik-docker-compose/docker-compose.yml"):
-                run("cd piwik-docker-compose && docker-compose up -d")
-                run("docker exec -d piwikdockercompose_db_1 mysqldump --result-file=dump.sql")
-            else:
-                run("git clone git@github.com:siutin/piwik-docker-compose.git")
-                run("cd piwik-docker-compose && docker-compose up -d")
-                run("docker exec -d piwikdockercompose_db_1 mysqldump --result-file=dump.sql")
-        cli.copy_resource(u"piwikdockercompose_db_1", '/dump.sql', cwd + "/dump.sql")
-    else:
-        get('/etc/nginx/sites-available/', cwd + "/dump.sql")
-
-
-@task
 def create_local_ini():
     """Replace the local.ini file with one composed from the current .rc file"""
     if not running_locally():
@@ -1458,6 +1432,47 @@ def rotate_database_dumps_dry_run():
 
 
 @task
+def generate_mysql_dump_script():
+    """
+    Use this to generate your local mysql dump script
+    Use your rc file to set your mysql user and password
+    """
+    from jinja2 import Environment, FileSystemLoader
+    jenv = Environment(loader=FileSystemLoader('configs/bluenove_server_configs'), autoescape=lambda t: False)
+    template = jenv.get_template('mysql_dump_script.sh.jinja2')
+    with open('mysql_dump_script.sh', 'w') as f:
+        f.write(template.render(mysql_user=env.mysql_user, mysql_password=env.mysql_password, assembl_user=env.assembl_user))
+
+
+@task
+def piwik_mysql_database_dump():
+    """
+    Dumps the piwik database on a remote site not using docker
+    To be launched with fab -c remote_server.rc mysql_database_dump
+    """
+    mysql_dump_script = open('mysql_dump_script.sh')
+    run(mysql_dump_script.read())
+    mysql_dump_script.close()
+
+
+@task
+def piwik_mysql_database_dump_docker():
+    """
+    Dumps the piwik database on a remote docker container
+    to be launched with fab -c remote_server.rc mysql_database_dump_docker"""
+    from fabric.contrib import files
+    if files.exists("/home/" + env.assembl_user + "/mysql_dump_script.sh"):
+        run("chmod +x /home/" + env.assembl_user + "/mysql_dump_script.sh")
+        run("sudo docker cp /home/" + env.assembl_user + "/mysql_dump_script.sh piwikdocker_db_1:/")
+        run("sudo docker exec -d piwikdocker_db_1 /mysql_dump_script.sh")
+    else:
+        put("mysql_dump_script.sh", "/home/" + env.assembl_user)
+        run("chmod +x /home/" + env.assembl_user + "/mysql_dump_script.sh")
+        run("sudo docker cp /home/" + env.assembl_user + "/mysql_dump_script.sh piwikdocker_db_1:/")
+        run("sudo docker exec -d piwikdocker_db_1 /mysql_dump_script.sh")
+
+
+@task
 def database_dump():
     """
     Dumps the database on remote site
@@ -1652,23 +1667,6 @@ def as_rc(ini_filename):
                 k = "__".join((section, k))
             r[k] = v
     return r
-
-
-@task
-def upload_backup_script():
-    from jinja2 import Environment, FileSystemLoader
-    from fabric.api import local
-    import os
-    cwd = os.getcwd()
-    if not os.path.exists("borg"):
-        os.mkdir("borg")
-    local("cp assembl_borg_backup.sh.jinja2 borg/")
-    jenv = Environment(
-        loader=FileSystemLoader('borg'),
-        autoescape=lambda t: False)
-    template = jenv.get_template('assembl_borg_backup.sh.jinja2')
-    with open('borg/backup_piwik_output.rc', 'w') as f:
-        f.write(template.render(assembl_path=cwd, repository="borg/borg_repository/", borg_passphrase="passphrase"))
 
 
 @task
