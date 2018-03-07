@@ -1,6 +1,6 @@
 #!/bin/bash
 #Date of today 
-DATE=`date +%y_%m_%d_%H_%M_%S`
+DATE=`date +%y_%m_%d`
 
 #liste des dossier
 LISTEBDD=$( echo 'show databases' | mysql --user={{mysql_user}} --password={{mysql_password}} )
@@ -12,7 +12,7 @@ do
 if [ $SQL == "piwik" ]; then
  
 
-mysqldump --user={{mysql_user}} --password={{mysql_password}} $SQL | gzip > /home/{{assembl_user}}/$SQL"_mysql"$DATE.sql.gz
+mysqldump --user={{mysql_user}} --password={{mysql_password}} $SQL | gzip > /home{{remote_dump_location}}/$SQL"_mysql20"$DATE.sql.gz
  
 fi
  

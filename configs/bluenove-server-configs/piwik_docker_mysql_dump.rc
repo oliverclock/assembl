@@ -1,7 +1,9 @@
-_extends = base_env.rc 
+_extends = ../base_env.rc 
 public_hostname = culturemanager.assembl.org
 assembl_user=mozayed
 _projectpath = /Users/mozayed/Assembl
-mysql_password=wwitri2Dzhishme
+mysql_password=
+# To be left empty if your are dumping on a server using docker
+remote_dump_location=
 docker_piwik =
 mysql_user=root

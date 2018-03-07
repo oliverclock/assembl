@@ -1432,16 +1432,24 @@ def rotate_database_dumps_dry_run():
 
 
 @task
+def show_date():
+    import datetime
+    print datetime.datetime.now().strftime('%Y_%m_%d')
+    return datetime.datetime.now().strftime('%Y_%m_%d')
+
+
+@task
 def generate_mysql_dump_script():
     """
     Use this to generate your local mysql dump script
     Use your rc file to set your mysql user and password
     """
     from jinja2 import Environment, FileSystemLoader
-    jenv = Environment(loader=FileSystemLoader('configs/bluenove_server_configs'), autoescape=lambda t: False)
+    jenv = Environment(loader=FileSystemLoader('doc/'), autoescape=lambda t: False)
     template = jenv.get_template('mysql_dump_script.sh.jinja2')
     with open('mysql_dump_script.sh', 'w') as f:
-        f.write(template.render(mysql_user=env.mysql_user, mysql_password=env.mysql_password, assembl_user=env.assembl_user))
+        f.write(template.render(mysql_user=env.mysql_user, mysql_password=env.mysql_password,
+                                assembl_user=env.assembl_user, remote_dump_location=env.remote_dump_location))
 
 
 @task
@@ -1459,17 +1467,17 @@ def piwik_mysql_database_dump():
 def piwik_mysql_database_dump_docker():
     """
     Dumps the piwik database on a remote docker container
-    to be launched with fab -c remote_server.rc mysql_database_dump_docker"""
-    from fabric.contrib import files
-    if files.exists("/home/" + env.assembl_user + "/mysql_dump_script.sh"):
-        run("chmod +x /home/" + env.assembl_user + "/mysql_dump_script.sh")
-        run("sudo docker cp /home/" + env.assembl_user + "/mysql_dump_script.sh piwikdocker_db_1:/")
-        run("sudo docker exec -d piwikdocker_db_1 /mysql_dump_script.sh")
-    else:
-        put("mysql_dump_script.sh", "/home/" + env.assembl_user)
-        run("chmod +x /home/" + env.assembl_user + "/mysql_dump_script.sh")
-        run("sudo docker cp /home/" + env.assembl_user + "/mysql_dump_script.sh piwikdocker_db_1:/")
-        run("sudo docker exec -d piwikdocker_db_1 /mysql_dump_script.sh")
+    to be launched with fab -c remote_server.rc mysql_database_dump_docker
+    """
+    current_date = show_date()
+    put("mysql_dump_script.sh", "/home/" + env.assembl_user)
+    run("chmod +x /home/" + env.assembl_user + "/mysql_dump_script.sh")
+    run("sudo -i docker cp /home/" + env.assembl_user + "/mysql_dump_script.sh piwikdocker_db_1:/")
+    run("sudo docker exec -d piwikdocker_db_1 /mysql_dump_script.sh")
+    run("sudo docker cp piwikdocker_db_1:/home/piwik_mysql" + current_date + ".sql.gz" + " /home/" + env.assembl_user)
+    run("sudo docker exec -d piwikdocker_db_1 rm /home/piwik_mysql" + current_date + ".sql.gz")
+    run("sudo docker exec -d piwikdocker_db_1 rm /mysql_dump_script.sh")
+    run("rm mysql_dump_script.sh")
 
 
 @task

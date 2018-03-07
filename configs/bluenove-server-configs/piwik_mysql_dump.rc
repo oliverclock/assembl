@@ -1,6 +1,7 @@
-_extends = base_env.rc 
+_extends = ../base_env.rc 
 public_hostname = stats.bluenove.com
 _projectpath = /home/assembl_user/assembl
 assembl_user=mozayed
-mysql_password=AHJnd028.5m!
+mysql_password=
 mysql_user=root
+remote_dump_location=/mozayed
