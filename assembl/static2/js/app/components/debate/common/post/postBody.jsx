@@ -87,6 +87,7 @@ const Html = (props) => {
         nodes.wrap(wrapper);
       });
     });
+    html = html.children;
   }
   const nodes = activeHtml(html, replacementComponents);
   const containerProps = { ...props };
