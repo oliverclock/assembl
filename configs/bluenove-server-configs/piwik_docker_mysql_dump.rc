@@ -7,3 +7,7 @@ mysql_password=
 remote_dump_location=
 docker_piwik =
 mysql_user=root
+assembl_path=
+repository=
+remote_server_backup_location=
+borg_repository=

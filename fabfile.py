@@ -1432,6 +1432,18 @@ def rotate_database_dumps_dry_run():
 
 
 @task
+def generate_borg_script():
+    from jinja2 import Environment, FileSystemLoader
+    jenv = Environment(
+        loader=FileSystemLoader('doc/'),
+        autoescape=lambda t: False)
+    template = jenv.get_template('assembl_borg_backup.sh.jinja2')
+    with open('doc/borg_backup_script/assembl_borg_backup_generated.sh', 'w') as f:
+        f.write(template.render(assembl_path=env.assembl_path, repository=env.borg_repository,
+                                remote_server_backup_location=env.remote_server_backup_location))
+
+
+@task
 def show_date():
     import datetime
     print datetime.datetime.now().strftime('%Y_%m_%d')
