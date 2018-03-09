@@ -166,6 +166,39 @@ def listdir(path):
 
 
 @task
+def get_ovh_vps_snapshot():
+    import ovh
+    import json
+    client = ovh.Client(
+        endpoint=env.endpoint,
+        application_key=env.application_key,
+        application_secret=env.application_secret,
+        consumer_key=env.consumer_key,
+    )
+
+    result = client.get('/vps/' + env.vps_identifier + '/snapshot')
+    print json.dumps(result, indent=4)
+
+
+@task
+def set_ovh_vps_snapshot():
+    import ovh
+    import json
+    import datetime
+    today_date = datetime.datetime.now().strftime('%Y_%m_%d_%H_%M_%S')
+    client = ovh.Client(
+        endpoint=env.endpoint,
+        application_key=env.application_key,
+        application_secret=env.application_secret,
+        consumer_key=env.consumer_key,
+    )
+
+    result = client.put('/vps/' + env.vps_identifier + '/snapshot',
+                        description='snapshot-' + today_date)
+    print json.dumps(result, indent=4)
+
+
+@task
 def update_vendor_config():
     """Update the repository of the currently used config file"""
     config_file_dir = dirname(env.rcfile)
@@ -1136,9 +1169,9 @@ def update_python_package_builddeps():
              'libgraphviz-dev libxmlsec1-dev')
         sudo('apt-get install -y libatlas-base-dev', warn_only=True)  # ubuntu >= 17.10
         sudo('apt-get install -y libatlas-dev', warn_only=True)  # others
-        print ("We are still trying to get some requirements right for linux, "
-               "See http://www.scipy.org/scipylib/building/linux.html "
-               "for details.")
+        print("We are still trying to get some requirements right for linux, "
+              "See http://www.scipy.org/scipylib/building/linux.html "
+              "for details.")
 
 
 @task
@@ -1569,7 +1602,7 @@ def database_restore():
             env.db_database,
             env.db_user,
             remote_db_path())
-        )
+            )
 
     for process in processes:
         supervisor_process_start(process)
@@ -1843,8 +1876,10 @@ def install_elasticsearch():
             sysd=join(extract_path, 'bin/elasticsearch-systemd-pre-exec'),
             log=join(extract_path, 'bin/elasticsearch-translog'),
         ))
-        run(env.projectpath + '/var/elasticsearch/bin/elasticsearch-plugin install https://artifacts.elastic.co/downloads/elasticsearch-plugins/analysis-smartcn/analysis-smartcn-{version}.zip'.format(version=ELASTICSEARCH_VERSION))
-        run(env.projectpath + '/var/elasticsearch/bin/elasticsearch-plugin install https://artifacts.elastic.co/downloads/elasticsearch-plugins/analysis-kuromoji/analysis-kuromoji-{version}.zip'.format(version=ELASTICSEARCH_VERSION))
+        run(env.projectpath + '/var/elasticsearch/bin/elasticsearch-plugin install https://artifacts.elastic.co/downloads/elasticsearch-plugins/analysis-smartcn/analysis-smartcn-{version}.zip'.format(
+            version=ELASTICSEARCH_VERSION))
+        run(env.projectpath + '/var/elasticsearch/bin/elasticsearch-plugin install https://artifacts.elastic.co/downloads/elasticsearch-plugins/analysis-kuromoji/analysis-kuromoji-{version}.zip'.format(
+            version=ELASTICSEARCH_VERSION))
 
         print(green("Successfully installed elasticsearch"))
 
