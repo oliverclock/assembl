@@ -23,6 +23,7 @@ from fabric.contrib.files import (exists, is_link, append)
 from fabric.api import (
     abort, cd, env, execute, hide, prefix, settings, task as fab_task)
 from fabric.colors import yellow, cyan, red, green
+import json
 
 # import logging
 # import paramiko
@@ -166,35 +167,71 @@ def listdir(path):
 
 
 @task
-def get_ovh_vps_snapshot():
+def create_ovh_client():
     import ovh
-    import json
     client = ovh.Client(
-        endpoint=env.endpoint,
-        application_key=env.application_key,
-        application_secret=env.application_secret,
-        consumer_key=env.consumer_key,
+        endpoint=env.ovh_hosting__endpoint,
+        application_key=env.ovh_hosting__application_key,
+        application_secret=env.ovh_hosting__application_secret,
+        consumer_key=env.ovh_hosting__consumer_key,
     )
+    return client
 
-    result = client.get('/vps/' + env.vps_identifier + '/snapshot')
+
+@task
+def get_ovh_vps_snapshot():
+    client = create_ovh_client()
+    result = client.get('/vps/' + env.ovh_hosting__vps_identifier + '/snapshot')
     print json.dumps(result, indent=4)
 
 
 @task
 def set_ovh_vps_snapshot():
-    import ovh
     import json
     import datetime
     today_date = datetime.datetime.now().strftime('%Y_%m_%d_%H_%M_%S')
-    client = ovh.Client(
-        endpoint=env.endpoint,
-        application_key=env.application_key,
-        application_secret=env.application_secret,
-        consumer_key=env.consumer_key,
-    )
-
-    result = client.put('/vps/' + env.vps_identifier + '/snapshot',
+    client = create_ovh_client()
+    result = client.put('/vps/' + env.ovh_hosting__vps_identifier + '/snapshot',
                         description='snapshot-' + today_date)
+    print json.dumps(result, indent=4)
+
+
+@task
+def list_secondary_dns_names_ovh():
+    client = create_ovh_client()
+    result = client.get('/vps/' + env.ovh_hosting__vps_identifier + '/secondaryDnsDomains')
+    print json.dumps(result, indent=4)
+
+
+@task
+def add_secondary_dns_names_ovh():
+    """Read list of secondary domain names to add from the file domain_name_list.rc"""
+    client = create_ovh_client()
+
+    with open("configs/bluenove-server-configs/domain_name_list.rc", "r") as f:
+        list_of_domains_to_add = f.readlines()
+
+    print(yellow("Adding the following domain names as secondary DNS domains"))
+    for domain in list_of_domains_to_add:
+        domain = domain.strip('\n')
+        print(yellow(domain))
+        result = client.post('/vps/' + env.ovh_hosting__vps_identifier + '/secondaryDnsDomains', domain=domain)
+
+    print json.dumps(result, indent=4)
+
+
+@task
+def remove_secondary_dns_names_ovh():
+    """Read list of secondary domain names to remove from the file domain_name_list.rc"""
+    client = create_ovh_client()
+    with open("configs/bluenove-server-configs/domain_name_list.rc", "r") as f:
+        list_of_domaines_to_remove = f.readlines()
+    print(yellow("Removing the following domain names as secondary DNS domains"))
+    for domain in list_of_domaines_to_remove:
+        domain = domain.strip('\n')
+        print(yellow(domain))
+        result = client.delete('/vps/' + env.ovh_hosting__vps_identifier + '/secondaryDnsDomains/' + domain)
+
     print json.dumps(result, indent=4)
 
 
