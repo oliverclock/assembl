@@ -72,15 +72,15 @@ def get_timeline_for_date(discussion, date):
 
 
 # This is the same logic as in getCurrentPhaseIdentifier in v2 frontend.
-def get_current_phase_identifier(timeline):
+def get_current_phase_identifier(timelines):
     """Return the current phase identifier, thread identifier if no timeline.
     """
-    if not timeline:
-        timeline = []
+    if not timelines:
+        timelines = []
 
     current_date = datetime.datetime.utcnow()
     identifier = u''
-    for phase in timeline:
+    for phase in timelines:
         start_date = phase.start
         end_date = phase.end
         if (current_date >= start_date) and (current_date < end_date):
@@ -89,16 +89,16 @@ def get_current_phase_identifier(timeline):
     return identifier or u'thread'
 
 
-def current_phase_use_v1_interface(timeline):
+def current_phase_use_v1_interface(timelines):
     """Return True if the current phase use the v1 interface.
     """
 
     # If no timeline configured, we use v1 interface.
-    if not timeline:
+    if not timelines:
         return True
 
     current_date = datetime.datetime.utcnow()
-    for phase in timeline:
+    for phase in timelines:
         start_date = phase.start
         end_date = phase.end
         if (current_date > start_date) and (current_date < end_date):
@@ -106,6 +106,47 @@ def current_phase_use_v1_interface(timeline):
 
     # If current_date isn't contained in any phase, assume v2 interface.
     return False
+
+
+def get_phases_from_time(discussion, time):
+    if not time:
+        return None
+
+    phases = []
+    for phase in discussion.timeline_events:
+        start_date = phase.start
+        end_date = phase.end
+        if (time > start_date) and (time < end_date):
+            phases.append(phase)
+
+    return phases
+
+
+def get_phase_identifier_for_post(post_id):
+    from assembl.models import Post, PropositionPost
+    post = Post.get(post_id)
+    discussion = post.discussion
+    phases = get_phases_from_time(discussion, post.creation_date)
+    if not phases:
+        raise Exception("A phase must exist for post id: %d" % post_id)
+
+    if len(phases) == 1:
+        return phases[0].identifier
+    else:
+        post_type = post.__class__
+        # Phase 1
+        if post_type == PropositionPost:
+            return 'survey'
+
+        # Multicolumn phase possibly
+        elif post.message_classifier:
+            if 'Multicolumn' in [p.identifier for p in phases]:
+                return u'Multicolumn'
+            else:
+                return u'thread'
+
+        else:
+            return u'thread'
 
 
 def is_using_landing_page(discussion):
