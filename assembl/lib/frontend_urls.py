@@ -122,31 +122,28 @@ def get_phases_from_time(discussion, time):
     return phases
 
 
-def get_phase_identifier_for_post(post_id):
+def get_phase_for_post(post_id):
     from assembl.models import Post, PropositionPost
     post = Post.get(post_id)
     discussion = post.discussion
     phases = get_phases_from_time(discussion, post.creation_date)
+    phase_by_id = {p.identifier: p for p in phases}
     if not phases:
         raise Exception("A phase must exist for post id: %d" % post_id)
-
     if len(phases) == 1:
-        return phases[0].identifier
+        return phases[0]
     else:
         post_type = post.__class__
         # Phase 1
         if post_type == PropositionPost:
-            return 'survey'
+            return phase_by_id['survey']
 
         # Multicolumn phase possibly
         elif post.message_classifier:
-            if 'Multicolumn' in [p.identifier for p in phases]:
-                return u'Multicolumn'
-            else:
-                return u'thread'
-
+            return phase_by_id['Multicolumn'] if 'Multicolumn' \
+                in phase_by_id else phase_by_id['thread']
         else:
-            return u'thread'
+            return phase_by_id['thread']
 
 
 def is_using_landing_page(discussion):

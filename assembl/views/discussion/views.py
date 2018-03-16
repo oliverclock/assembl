@@ -18,7 +18,7 @@ from urlparse import urljoin
 
 from ...lib.utils import path_qs
 from ...lib.sqla import get_named_object
-from ...lib.frontend_urls import FrontendUrls
+from ...lib.frontend_urls import FrontendUrls, get_phase_for_post
 from ...auth import P_READ, P_ADD_EXTRACT, P_ADMIN_DISC
 from ...auth.util import user_has_permission, get_non_expired_user_id
 from ...models import (
@@ -375,7 +375,7 @@ def purl_post(request):
     post = get_named_object(post_id)
     if not post:
         raise HTTPNotFound()
-    phase = discussion.current_discussion_phase()
+    phase = get_phase_for_post(post.id)
     if (discussion.preferences['landing_page'] and (
             phase is None or not phase.interface_v1)):
         if post.__class__ == PropositionPost:
@@ -423,7 +423,6 @@ def purl_ideas(request):
     furl = FrontendUrls(discussion)
     idea_id = furl.getRequestedIdeaId(request)
     idea = get_named_object(idea_id)
-    phase = discussion.current_discussion_phase()
     if (discussion.preferences['landing_page'] and (
             phase is None or not phase.interface_v1)):
         if not idea:
