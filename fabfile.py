@@ -167,8 +167,115 @@ def listdir(path):
 
 
 @task
+def get_available_ovh_services():
+    """List all available ovh services"""
+    client = create_ovh_client()
+    result = client.get('/vps')
+    print json.dumps(result, indent=4)
+
+
+@task
+def get_domain_records():
+    """Obtains all records for a specific domain"""
+    records = {}
+    client = create_ovh_client()
+    domain = 'assembl.fr'
+    # List all Ids and get info for each one
+    record_ids = client.get('/domain/zone/{}/record/'.format(domain))
+    for record_id in record_ids:
+        info = client.get('/domain/zone/{}/record/{}'.format(domain, record_id))
+        records[info['subDomain']] = info
+    print json.dumps(records, indent=4)
+    return records
+
+
+def check_field_type_exists(field):
+    """Checks if the inputs in your dns_entries.json file are valid"""
+    type = dict(default='A', choices=['A',
+                                      'AAAA',
+                                      'CNAME',
+                                      'DKIM',
+                                      'LOC',
+                                      'MX',
+                                      'NAPTR',
+                                      'NS',
+                                      'PTR',
+                                      'SPF',
+                                      'SRV',
+                                      'SSHFP',
+                                      'TXT'])
+    return field in type['choices']
+
+
+@task
+def check_dns_entries(data):
+    """Checks if the inputs in your dns_entries.json file are valid"""
+    my_list = []
+    for domain in data:
+        print domain
+        print data[domain]
+        for base in data[domain]:
+            print base
+            my_list.append(base["type"])
+    for item in my_list:
+        print item
+
+    if all(check_field_type_exists(item) for item in my_list):
+        return True
+    else:
+        for item in my_list:
+            if not check_field_type_exists(item):
+                print "The field type " + item + "is not valid"
+                return False
+
+
+@task
+def check_domains(data):
+    """Checks if the domains you provided in the dns_entries.json are valid"""
+    domain_list = get_domain_list()
+    if all(domain in domain_list for domain in data):
+        return True
+    else:
+        for domain in data:
+            if domain not in domain_list:
+                print "The domain " + domain + " is not in the domain list"
+                return False
+
+
+@task
+def get_dns_entries_from_file():
+    import json
+    data = json.load(open('configs/bluenove-server-configs/dns_entries.json'))
+    print json.dumps(data, indent=4)
+    return data
+
+
+@task
+def get_domain_list():
+    client = create_ovh_client()
+
+    result = client.get('/domain')
+    print json.dumps(result, indent=4)
+    return result
+
+
+@task
+def create_new_dns_record():
+    data = get_dns_entries_from_file()
+    if check_dns_entries(data) and check_domains(data):
+        client = create_ovh_client()
+        for domain in data:
+            for entry in data[domain]:
+                client.post('/domain/zone/' + domain + '/record', fieldType=entry["type"], target=entry["value"])
+
+
+@task
 def create_ovh_client():
-    import ovh
+    try:
+        import ovh
+    except:
+        print "Running pip install ovh"
+        local("pip install ovh")
     client = ovh.Client(
         endpoint=env.ovh_hosting__endpoint,
         application_key=env.ovh_hosting__application_key,
