@@ -26,7 +26,7 @@ ATTACHMENT_PURPOSES = {
 
 PHASE_ID = {
     'survey': 'survey',
-    'multicolumn': 'multicolumn',
+    'multicolumn': 'multiColumns',
     'thread': 'thread',
     'voteSession': 'voteSession'
 }
