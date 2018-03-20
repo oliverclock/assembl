@@ -137,7 +137,8 @@ def get_phase_for_post(post_id):
     phases = get_phases_from_time(discussion, post.creation_date)
     phase_by_id = {p.identifier: p for p in phases}
     if not phases:
-        raise Exception("A phase must exist for post id: %d" % post_id)
+        # Could be V1 debate with no phases
+        return None
     if len(phases) == 1:
         return phases[0]
     else:

@@ -377,7 +377,7 @@ def purl_post(request):
         raise HTTPNotFound()
     phase = get_phase_for_post(post.id)
     if (discussion.preferences['landing_page'] and (
-            phase is None or not phase.interface_v1)):
+            phase is not None or not phase.interface_v1)):
         if post.__class__ == PropositionPost:
             idea = post.get_closest_thematic()
         else:

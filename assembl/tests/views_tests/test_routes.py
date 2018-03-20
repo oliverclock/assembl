@@ -505,8 +505,7 @@ def test_phase_purl_post_multicolumn_post(
 def test_phase_purl_post_survey_post(
         proposition_id,
         discussion,
-        timeline_survey_and_thread,
-        test_session):
+        timeline_survey_and_thread):
     from graphene.relay import Node
     from assembl.lib.frontend_urls import get_phase_for_post
     post_id = Node.from_global_id(proposition_id)[1]
