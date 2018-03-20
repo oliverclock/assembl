@@ -24,6 +24,13 @@ ATTACHMENT_PURPOSES = {
 }
 
 
+PHASE_ID = {
+    'survey': 'survey',
+    'multicolumn': 'multicolumn',
+    'thread': 'thread',
+    'voteSession': 'voteSession'
+}
+
 frontend_routes = None
 
 
@@ -125,6 +132,7 @@ def get_phases_from_time(discussion, time):
 def get_phase_for_post(post_id):
     from assembl.models import Post, PropositionPost
     post = Post.get(post_id)
+    assert post
     discussion = post.discussion
     phases = get_phases_from_time(discussion, post.creation_date)
     phase_by_id = {p.identifier: p for p in phases}

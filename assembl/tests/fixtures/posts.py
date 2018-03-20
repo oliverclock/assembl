@@ -39,7 +39,7 @@ def root_post_1_with_positive_message_classifier(request, participant1_user,
         discussion=discussion, creator=participant1_user,
         subject=LangString.create(u"a root post"),
         body=LangString.create(u"post body"), moderator=None,
-        creation_date=datetime(year=2000, month=1, day=1),
+        creation_date=datetime(year=2018, month=1, day=2),
         type="post", message_id="msg1@example.com",
         message_classifier=idea_message_column_positive.message_classifier)
     test_session.add(p)

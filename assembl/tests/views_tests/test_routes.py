@@ -489,3 +489,27 @@ def test_url_to_post_v2_proposal(discussion, proposals_en_fr,
     expected = 'jacklayton2/debate/thread/theme/'
     actual = frontend_urls.get_post_url(proposals_en_fr[0])
     assert expected in actual
+
+
+def test_phase_purl_post_multicolumn_post(
+        discussion,
+        timeline_multicolumn_and_thread,
+        root_post_1_with_positive_message_classifier):
+
+    from assembl.lib.frontend_urls import get_phase_for_post
+    post_id = root_post_1_with_positive_message_classifier.id
+    phase = get_phase_for_post(post_id)
+    assert phase == timeline_multicolumn_and_thread[0]
+
+
+def test_phase_purl_post_survey_post(
+        proposition_id,
+        discussion,
+        timeline_survey_and_thread,
+        test_session):
+    from graphene.relay import Node
+    from assembl.lib.frontend_urls import get_phase_for_post
+    post_id = Node.from_global_id(proposition_id)[1]
+    phase = get_phase_for_post(post_id)
+    expected_phase = timeline_survey_and_thread[0]
+    assert phase == expected_phase

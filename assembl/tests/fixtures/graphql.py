@@ -203,7 +203,7 @@ mutation myMutation {
 
 
 @pytest.fixture(scope="function")
-def proposition_id(graphql_request, thematic_and_question):
+def proposition_id(request, graphql_request, thematic_and_question):
     from assembl.graphql.schema import Schema as schema
     thematic_id, first_question_id = thematic_and_question
     res = schema.execute(u"""
@@ -223,6 +223,18 @@ mutation myFirstMutation {
 }
 """ % first_question_id, context_value=graphql_request)
     post_id = res.data['createPost']['post']['id']
+
+    def fin():
+        res = schema.execute(u"""
+            mutation myDeletion($postId: ID!) {
+                deletePost(postId: $postId) {
+                    post {
+                        id
+                    }
+                }
+            }""", context_value=graphql_request, variable_values={"postId": post_id})
+        assert res.errors is None
+    request.addfinalizer(fin)
     return post_id
 
 

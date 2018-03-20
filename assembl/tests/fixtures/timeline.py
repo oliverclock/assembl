@@ -136,19 +136,20 @@ def timeline_phase2_interface_v2(request, test_app, test_session, discussion):
     request.addfinalizer(fin)
     return phase2
 
+
 @pytest.fixture(scope="function")
 def timeline_vote_session(request, test_session, discussion):
     from assembl.models import DiscussionPhase, LangString
 
     phase = DiscussionPhase(
-        discussion = discussion,
-        identifier = 'voteSession',
-        title = LangString.create(u"voteSession phase title fixture", "en"),
-        description = LangString.create(u"voteSession phase description fixture", "en"),
-        start = datetime(2014, 12, 31, 9, 0, 0),
-        end = datetime(2015, 12, 31, 9, 0, 0),
-        interface_v1 = False,
-        image_url = u'https://example.net/image.jpg'
+        discussion=discussion,
+        identifier='voteSession',
+        title=LangString.create(u"voteSession phase title fixture", "en"),
+        description=LangString.create(u"voteSession phase description fixture", "en"),
+        start=datetime(2014, 12, 31, 9, 0, 0),
+        end=datetime(2015, 12, 31, 9, 0, 0),
+        interface_v1=False,
+        image_url=u'https://example.net/image.jpg'
     )
 
 
@@ -163,3 +164,65 @@ def timeline_vote_session(request, test_session, discussion):
 
     request.addfinalizer(fin)
     return phase
+
+
+@pytest.fixture(scope="function")
+def timeline_multicolumn_and_thread(request, test_session, discussion):
+    from assembl.models import DiscussionPhase, LangString
+    from assembl.lib.frontend_urls import PHASE_ID
+
+    thread_phase = DiscussionPhase(
+        discussion=discussion,
+        identifier=PHASE_ID['thread'],
+        title=LangString.create(u"Thread phase", "en"),
+        description=LangString.create(u"A description of thread phase", "en"),
+        start=datetime(2018, 1, 1),
+        end=datetime(2020, 1, 1),
+        interface_v1=False,
+        image_url=u'https://example.net/image.jpg'
+    )
+
+    multicolumn_phase = DiscussionPhase(
+        discussion=discussion,
+        identifier=PHASE_ID['multicolumn'],
+        title=LangString.create(u"Column phase", "en"),
+        description=LangString.create(u"A description of columns phase", "en"),
+        start=datetime(2018, 1, 1),
+        end=datetime(2020, 1, 1),
+        interface_v1=False,
+        image_url=u'https://example.net/image2.jpg'
+    )
+    test_session.add(thread_phase)
+    test_session.add(multicolumn_phase)
+    test_session.flush()
+
+    def fin():
+        print "finalizer timeline_multicolumn_and_thread"
+        test_session.delete(multicolumn_phase)
+        test_session.delete(thread_phase)
+        test_session.flush()
+
+    request.addfinalizer(fin)
+    return (thread_phase, multicolumn_phase)
+
+
+@pytest.fixture(scope='function')
+def timeline_survey_and_thread(
+        request,
+        test_session,
+        discussion,
+        timeline_phase2_interface_v2):
+
+    from assembl.models import DiscussionPhase
+    from assembl.lib.frontend_urls import PHASE_ID
+    thread_phase = test_session.query(DiscussionPhase)\
+        .filter(
+            DiscussionPhase.identifier == PHASE_ID['survey'] and DiscussionPhase.discussion_id == discussion.id)\
+        .first()
+    thread_phase.end = datetime(2030, 1, 1)
+    test_session.flush()
+
+    phases = test_session.query(DiscussionPhase)\
+        .filter_by(discussion_id=discussion.id).all()
+    phases = filter(lambda x: x.identifier != PHASE_ID['survey'], phases)
+    return [thread_phase] + phases
