@@ -512,3 +512,19 @@ def test_phase_purl_post_survey_post(
     phase = get_phase_for_post(post_id)
     expected_phase = timeline_survey_and_thread[0]
     assert phase == expected_phase
+
+
+def test_phase_purl_idea_thematic(
+        timeline_survey_and_thread,
+        thematic_and_question):
+    from graphene.relay import Node
+    from assembl.lib.frontend_urls import get_phase_for_idea
+    thematic_id = Node.from_global_id(thematic_and_question[0])[1]
+    question_id = Node.from_global_id(thematic_and_question[1])[1]
+
+    expected_phase = timeline_survey_and_thread[0]
+    phase1 = get_phase_for_idea(thematic_id)
+    phase2 = get_phase_for_idea(question_id)
+
+    assert phase1 == expected_phase
+    assert phase2 == expected_phase

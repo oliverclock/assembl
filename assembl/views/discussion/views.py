@@ -5,7 +5,6 @@ import os.path
 import pkg_resources
 
 from pyramid.view import view_config
-from pyramid.request import Request
 from pyramid.response import Response
 from pyramid.renderers import render_to_response
 from pyramid.security import Everyone, forget
@@ -18,7 +17,11 @@ from urlparse import urljoin
 
 from ...lib.utils import path_qs
 from ...lib.sqla import get_named_object
-from ...lib.frontend_urls import FrontendUrls, get_phase_for_post
+from ...lib.frontend_urls import (
+    FrontendUrls,
+    get_phase_for_post,
+    get_phase_for_idea
+)
 from ...auth import P_READ, P_ADD_EXTRACT, P_ADMIN_DISC
 from ...auth.util import user_has_permission, get_non_expired_user_id
 from ...models import (
@@ -423,8 +426,9 @@ def purl_ideas(request):
     furl = FrontendUrls(discussion)
     idea_id = furl.getRequestedIdeaId(request)
     idea = get_named_object(idea_id)
+    phase = get_phase_for_idea(idea.id)
     if (discussion.preferences['landing_page'] and (
-            phase is None or not phase.interface_v1)):
+            phase is not None or not phase.interface_v1)):
         if not idea:
             # If no idea is found, redirect to new home instead of 404
             # TODO: Determine if this is acceptable practice

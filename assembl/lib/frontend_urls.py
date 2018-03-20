@@ -155,6 +155,36 @@ def get_phase_for_post(post_id):
             return phase_by_id['thread']
 
 
+def get_phase_for_idea(idea_id):
+    from assembl.models import Idea, Thematic, Question
+    idea = Idea.get(idea_id)
+    assert idea
+    discussion = idea.discussion
+    phases = get_phases_from_time(discussion, idea.creation_date)
+    phase_by_id = {p.identifier: p for p in phases}
+    if not phases:
+        raise Exception("A phase must exist for idea id: %d" % idea_id)
+    if len(phases) == 1:
+        return phases[0]
+    else:
+        idea_type = idea.__class__
+        # Phase 1
+        if idea_type in (Thematic, Question):
+            return phase_by_id[PHASE_ID['survey']]
+
+        # Multicolumn
+        elif idea.message_columns is not None:
+            if PHASE_ID['multicolumn'] in phase_by_id:
+                return phase_by_id[PHASE_ID['multicolumn']]
+            return phase_by_id[PHASE_ID['thread']]
+
+        # Vote Session
+        elif idea.criterion_for is not None and PHASE_ID['voteSession'] in phase_by_id:
+            return phase_by_id[PHASE_ID['voteSession']]
+
+        return phase_by_id[PHASE_ID['thread']]
+
+
 def is_using_landing_page(discussion):
     return discussion.preferences.get('landing_page', False)
 
