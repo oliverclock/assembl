@@ -24,6 +24,7 @@ ATTACHMENT_PURPOSES = {
 }
 
 
+# This should match with :js:data:: PHASE in :js:module:: constants.js
 PHASE_ID = {
     'survey': 'survey',
     'multicolumn': 'multiColumns',
