@@ -163,7 +163,8 @@ def get_phase_for_idea(idea_id):
     phases = get_phases_from_time(discussion, idea.creation_date)
     phase_by_id = {p.identifier: p for p in phases}
     if not phases:
-        raise Exception("A phase must exist for idea id: %d" % idea_id)
+        # Could be a V1 discussion only
+        return None
     if len(phases) == 1:
         return phases[0]
     else:
