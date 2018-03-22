@@ -175,11 +175,10 @@ def get_available_ovh_services():
 
 
 @task
-def get_domain_records():
+def get_domain_records(domain):
     """Obtains all records for a specific domain"""
     records = {}
     client = create_ovh_client()
-    domain = 'assembl.fr'
     # List all Ids and get info for each one
     record_ids = client.get('/domain/zone/{}/record/'.format(domain))
     for record_id in record_ids:
@@ -267,6 +266,22 @@ def create_new_dns_record():
         for domain in data:
             for entry in data[domain]:
                 client.post('/domain/zone/' + domain + '/record', fieldType=entry["type"], target=entry["value"])
+
+
+@task
+def create_new_dns_record_cmd_line_arguments(domain_entry, field_type_entry, target_entry):
+    client = create_ovh_client()
+    if domain_entry not in get_domain_list():
+        print "The domain " + domain_entry + " is not a valid domain"
+        print "The valid domains are:"
+        for domain in get_domain_list():
+            print domain
+    elif not check_field_type_exists(field_type_entry):
+        print "The field " + field_type_entry + " is not a valid field type"
+        print "Valid field types are A, AAAA, CNAME, DKIM, LOC, MX, NAPTR, NS, PTR, SPF, SRV, SSHFP, TXT"
+    else:
+        print "Creating new DNS record for the domain " + domain_entry + " with field type " + field_type_entry + " with target " + target_entry
+        client.post('/domain/zone/' + domain_entry + '/record', fieldType=field_type_entry, target=target_entry)
 
 
 @task
