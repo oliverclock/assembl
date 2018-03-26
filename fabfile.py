@@ -39,6 +39,20 @@ import json
 
 DEFAULT_SECTION = "DEFAULT"
 
+FIELD_TYPE = dict(default='A', choices=['A',
+                                        'AAAA',
+                                        'CNAME',
+                                        'DKIM',
+                                        'LOC',
+                                        'MX',
+                                        'NAPTR',
+                                        'NS',
+                                        'PTR',
+                                        'SPF',
+                                        'SRV',
+                                        'SSHFP',
+                                        'TXT'])
+
 
 def running_locally(hosts=None):
     hosts = hosts or env.hosts
@@ -180,51 +194,59 @@ def get_domain_records(domain):
     records = {}
     client = create_ovh_client()
     # List all Ids and get info for each one
-    record_ids = client.get('/domain/zone/{}/record/'.format(domain))
+    record_ids = client.get('/domain/zone/{domain}/record/'.format(domain=domain))
     for record_id in record_ids:
-        info = client.get('/domain/zone/{}/record/{}'.format(domain, record_id))
+        info = client.get('/domain/zone/{domain}/record/{record_id}'.format(domain=domain, record_id=record_id))
         records[info['subDomain']] = info
     print json.dumps(records, indent=4)
     return records
 
 
+@task
+def delete_dns_record(domain, entry_id):
+    """Deletes the dns record with the given id"""
+    client = create_ovh_client()
+    result = client.delete('/domain/zone/{domain}/record/{entry_id}'.format(domain=domain, entry_id=entry_id))
+    print json.dumps(result, indent=4)
+
+
+@task
+def delete_all_dns_records(domain):
+    """Deletes all DNS records for a given domain"""
+    client = create_ovh_client()
+    domain_record_list = get_domain_records(domain)
+    for record in domain_record_list:
+        print domain_record_list[record]["id"]
+        record_id = domain_record_list[record]["id"]
+        result = client.delete('/domain/zone/{domain}/record/{record_id}'.format(domain=domain, record_id=record_id))
+    return result
+
+
+@task
 def check_field_type_exists(field):
     """Checks if the inputs in your dns_entries.json file are valid"""
-    type = dict(default='A', choices=['A',
-                                      'AAAA',
-                                      'CNAME',
-                                      'DKIM',
-                                      'LOC',
-                                      'MX',
-                                      'NAPTR',
-                                      'NS',
-                                      'PTR',
-                                      'SPF',
-                                      'SRV',
-                                      'SSHFP',
-                                      'TXT'])
-    return field in type['choices']
+    return field in FIELD_TYPE['choices']
 
 
 @task
 def check_dns_entries(data):
     """Checks if the inputs in your dns_entries.json file are valid"""
-    my_list = []
+    entries_types = []
     for domain in data:
         print domain
         print data[domain]
         for base in data[domain]:
             print base
-            my_list.append(base["type"])
-    for item in my_list:
+            entries_types.append(base["type"])
+    for item in entries_types:
         print item
 
-    if all(check_field_type_exists(item) for item in my_list):
+    if all(check_field_type_exists(item) for item in entries_types):
         return True
     else:
-        for item in my_list:
+        for item in entries_types:
             if not check_field_type_exists(item):
-                print "The field type " + item + "is not valid"
+                print("The field type {item} is not valid".format(item=item))
                 return False
 
 
@@ -237,13 +259,12 @@ def check_domains(data):
     else:
         for domain in data:
             if domain not in domain_list:
-                print "The domain " + domain + " is not in the domain list"
+                print("The domain {domain} is not in the domain list".format(domain=domain))
                 return False
 
 
 @task
 def get_dns_entries_from_file():
-    import json
     data = json.load(open('configs/bluenove-server-configs/dns_entries.json'))
     print json.dumps(data, indent=4)
     return data
@@ -252,7 +273,6 @@ def get_dns_entries_from_file():
 @task
 def get_domain_list():
     client = create_ovh_client()
-
     result = client.get('/domain')
     print json.dumps(result, indent=4)
     return result
@@ -265,26 +285,26 @@ def create_new_dns_record():
         client = create_ovh_client()
         for domain in data:
             for entry in data[domain]:
-                client.post('/domain/zone/' + domain + '/record', fieldType=entry["type"], target=entry["value"])
+                client.post('/domain/zone/{domain}/record'.format(domain=domain), fieldType=entry["type"], target=entry["value"])
 
 
 @task
 def create_new_dns_record_cmd_line_arguments(domain_entry, field_type_entry, target_entry):
     client = create_ovh_client()
     if domain_entry not in get_domain_list():
-        print "The domain " + domain_entry + " is not a valid domain"
+        print("The domain {domain_entry} is not a valid domain".format(domain_entry=domain_entry))
         print "The valid domains are:"
         for domain in get_domain_list():
             print domain
     elif not check_field_type_exists(field_type_entry):
-        print "The field " + field_type_entry + " is not a valid field type"
+        print("The field {field_type_entry} is not a valid field type".format(field_type_entry=field_type_entry))
         print "Valid field types are A, AAAA, CNAME, DKIM, LOC, MX, NAPTR, NS, PTR, SPF, SRV, SSHFP, TXT"
     else:
-        print "Creating new DNS record for the domain " + domain_entry + " with field type " + field_type_entry + " with target " + target_entry
-        client.post('/domain/zone/' + domain_entry + '/record', fieldType=field_type_entry, target=target_entry)
+        print("Creating new DNS record for the domain {domain_entry} with field type {field_type_entry} with target {target_entry}".format(
+            domain_entry=domain_entry, field_type_entry=field_type_entry, target_entry=target_entry))
+        client.post('/domain/zone/{domain_entry}/record'.format(domain_entry=domain_entry), fieldType=field_type_entry, target=target_entry)
 
 
-@task
 def create_ovh_client():
     try:
         import ovh
@@ -303,25 +323,24 @@ def create_ovh_client():
 @task
 def get_ovh_vps_snapshot():
     client = create_ovh_client()
-    result = client.get('/vps/' + env.ovh_hosting__vps_identifier + '/snapshot')
+    result = client.get('/vps/{vps_identifier}/snapshot'.format(vps_identifier=env.ovh_hosting__vps_identifier))
     print json.dumps(result, indent=4)
 
 
 @task
 def set_ovh_vps_snapshot():
-    import json
     import datetime
     today_date = datetime.datetime.now().strftime('%Y_%m_%d_%H_%M_%S')
     client = create_ovh_client()
-    result = client.put('/vps/' + env.ovh_hosting__vps_identifier + '/snapshot',
-                        description='snapshot-' + today_date)
+    result = client.put('/vps/{vps_identifier}/snapshot'.format(vps_identifier=env.ovh_hosting__vps_identifier),
+                        description='snapshot-{today_date}'.format(today_date=today_date))
     print json.dumps(result, indent=4)
 
 
 @task
 def list_secondary_dns_names_ovh():
     client = create_ovh_client()
-    result = client.get('/vps/' + env.ovh_hosting__vps_identifier + '/secondaryDnsDomains')
+    result = client.get('/vps/{vps_identifier}/secondaryDnsDomains'.format(vps_identifier=env.ovh_hosting__vps_identifier))
     print json.dumps(result, indent=4)
 
 
@@ -329,16 +348,13 @@ def list_secondary_dns_names_ovh():
 def add_secondary_dns_names_ovh():
     """Read list of secondary domain names to add from the file domain_name_list.rc"""
     client = create_ovh_client()
-
     with open("configs/bluenove-server-configs/domain_name_list.rc", "r") as f:
-        list_of_domains_to_add = f.readlines()
-
+        domains_to_add = f.readlines()
     print(yellow("Adding the following domain names as secondary DNS domains"))
-    for domain in list_of_domains_to_add:
+    for domain in domains_to_add:
         domain = domain.strip('\n')
         print(yellow(domain))
-        result = client.post('/vps/' + env.ovh_hosting__vps_identifier + '/secondaryDnsDomains', domain=domain)
-
+        result = client.post('/vps/{vps_identifier}/secondaryDnsDomains'.format(vps_identifier=env.ovh_hosting__vps_identifier), domain=domain)
     print json.dumps(result, indent=4)
 
 
@@ -347,13 +363,12 @@ def remove_secondary_dns_names_ovh():
     """Read list of secondary domain names to remove from the file domain_name_list.rc"""
     client = create_ovh_client()
     with open("configs/bluenove-server-configs/domain_name_list.rc", "r") as f:
-        list_of_domaines_to_remove = f.readlines()
+        domains_to_remove = f.readlines()
     print(yellow("Removing the following domain names as secondary DNS domains"))
-    for domain in list_of_domaines_to_remove:
+    for domain in domains_to_remove:
         domain = domain.strip('\n')
         print(yellow(domain))
-        result = client.delete('/vps/' + env.ovh_hosting__vps_identifier + '/secondaryDnsDomains/' + domain)
-
+        result = client.delete('/vps/{vps_identifier}/secondaryDnsDomains/{domain}'.format(vps_identifier=env.ovh_hosting__vps_identifier, domain=domain))
     print json.dumps(result, indent=4)
 
 
